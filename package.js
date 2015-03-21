@@ -1,7 +1,7 @@
 Package.describe({
   summary: "Reaction Stripe - Stripe payments for Reaction Commerce",
   name: "reactioncommerce:reaction-stripe",
-  version: "1.2.0",
+  version: "1.3.0",
   git: "https://github.com/reactioncommerce/reaction-stripe.git"
 });
 
@@ -9,10 +9,10 @@ Npm.depends({'stripe': '3.0.3'});
 
 Package.onUse(function (api, where) {
   api.versionsFrom('METEOR@1.0');
-  api.use("meteor-platform@1.2.1");
+  api.use("meteor-platform");
   api.use("coffeescript");
   api.use("less");
-  api.use("reactioncommerce:core@0.4.1");
+  api.use("reactioncommerce:core@0.5.0");
 
   api.addFiles("server/register.coffee",["server"]); // register as a reaction package
   api.addFiles("server/stripe.coffee",["server"]);

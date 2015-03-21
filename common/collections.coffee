@@ -23,7 +23,8 @@ ReactionCore.Schemas.StripePayment = new SimpleSchema
     label: "Cardholder name"
   cardNumber:
     type: String
-    min: 16
+    min: 14
+    max: 16
     label: "Card number"
   expireMonth:
     type: String
