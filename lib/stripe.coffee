@@ -3,6 +3,7 @@ Meteor.Stripe =
     # Note: Stripe does not have a flag for indicating sandbox vs production,
     #       it infers automatically based on the api key provided.
     settings = ReactionCore.Collections.Packages.findOne(name: "reaction-stripe").settings
+    unless settings.api_key then throw new Meteor.Error 403, "Invalid Stripe Credentials"
     return settings.api_key
 
   # submit a payment authorization to Stripe
