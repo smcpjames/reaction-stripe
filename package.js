@@ -14,22 +14,22 @@ Package.onUse(function (api, where) {
   api.use("less");
   api.use("reactioncommerce:core@0.6.1");
 
-  api.addFiles("server/register.coffee",["server"]); // register as a reaction package
-  api.addFiles("server/stripe.coffee",["server"]);
+  api.addFiles("server/register.js",["server"]); // register as a reaction package
+  api.addFiles("server/stripe.js",["server"]);
 
   api.addFiles([
-    "common/collections.coffee",
-    "common/routing.coffee",
-    "lib/stripe.coffee"
+    "common/collections.js",
+    "common/routing.js",
+    "lib/stripe.js"
     ],["client","server"]);
 
   api.addFiles([
     "client/templates/stripe.html",
     "client/templates/stripe.less",
-    "client/templates/stripe.coffee",
+    "client/templates/stripe.js",
     "client/templates/cart/checkout/payment/methods/stripe/stripe.html",
     "client/templates/cart/checkout/payment/methods/stripe/stripe.less",
-    "client/templates/cart/checkout/payment/methods/stripe/stripe.coffee"
+    "client/templates/cart/checkout/payment/methods/stripe/stripe.js"
     ],
     ["client"]);
 });
