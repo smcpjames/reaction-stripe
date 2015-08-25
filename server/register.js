@@ -1,4 +1,5 @@
 ReactionCore.registerPackage({
+  label: "Stripe",
   name: 'reaction-stripe',
   autoEnable: false,
   settings: {
@@ -6,6 +7,7 @@ ReactionCore.registerPackage({
     api_key: ""
   },
   registry: [
+    // Dashboard card
     {
       provides: 'dashboard',
       label: 'Stripe',
@@ -13,11 +15,19 @@ ReactionCore.registerPackage({
       icon: 'fa fa-cc-stripe',
       cycle: '3',
       container: 'dashboard'
-    }, {
+    },
+
+    // Settings panel
+    {
+      label: "Stripe Settings",
+      i18nLabel: "app.stripeSettings",
       route: 'stripe',
       provides: 'settings',
       container: 'dashboard'
-    }, {
+    },
+
+    // Payment form for checkout
+    {
       template: 'stripePaymentForm',
       provides: 'paymentMethod'
     }
