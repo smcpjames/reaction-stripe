@@ -1,4 +1,4 @@
-Template.stripe.helpers({
+Template.stripeSettings.helpers({
   packageData: function() {
     return ReactionCore.Collections.Packages.findOne({
       name: "reaction-stripe"

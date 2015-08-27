@@ -23,7 +23,8 @@ ReactionCore.registerPackage({
       i18nLabel: "app.stripeSettings",
       route: 'stripe',
       provides: 'settings',
-      container: 'dashboard'
+      container: 'dashboard',
+      template: 'stripeSettings',
     },
 
     // Payment form for checkout
