@@ -1,17 +1,17 @@
 Package.describe({
   summary: "Reaction Stripe - Stripe payments for Reaction Commerce",
   name: "reactioncommerce:reaction-stripe",
-  version: "1.4.0",
+  version: "2.0.0",
   git: "https://github.com/reactioncommerce/reaction-stripe.git"
 });
 
-Npm.depends({'stripe': '3.6.0'});
+Npm.depends({'stripe': '3.7.1'});
 
 Package.onUse(function (api, where) {
-  api.versionsFrom('METEOR@1.0');
+  api.versionsFrom('METEOR@1.1.0.2');
   api.use("meteor-platform");
   api.use("less");
-  api.use("reactioncommerce:core@0.6.1");
+  api.use("reactioncommerce:core@0.7.0");
 
   api.addFiles("server/register.js",["server"]); // register as a reaction package
   api.addFiles("server/stripe.js",["server"]);

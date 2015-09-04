@@ -26,7 +26,7 @@ Meteor.methods({
       chargeObj.capture = false;
     }
     chargeObj.card = Meteor.Stripe.parseCardData(cardData);
-    chargeObj.amount = parseFloat(paymentData.total) * 100;
+    chargeObj.amount =  Math.round(paymentData.total * 100);
     chargeObj.currency = paymentData.currency;
     fut = new Future();
     this.unblock();
