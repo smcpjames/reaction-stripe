@@ -1,6 +1,7 @@
 ReactionCore.registerPackage({
   label: "Stripe",
   name: 'reaction-stripe',
+  icon: 'fa fa-cc-stripe',
   autoEnable: false,
   settings: {
     mode: false,
