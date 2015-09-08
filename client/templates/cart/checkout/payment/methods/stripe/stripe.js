@@ -87,7 +87,7 @@ AutoForm.addHooks("stripe-payment-form", {
             transactions: []
           };
           paymentMethod.transactions.push(transaction.response);
-          Meteor.call("cart/processPayment", paymentMethod);
+          Meteor.call("cart/submitPayment", paymentMethod);
         } else {
           handleStripeSubmitError(transaction.error);
           uiEnd(template, "Resubmit payment");
