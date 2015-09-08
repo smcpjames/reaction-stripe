@@ -1,8 +1,8 @@
 Router.map(function() {
-  return this.route('stripe', {
-    controller: ShopSettingsController,
-    path: 'dashboard/settings/stripe',
-    template: 'stripe',
+  return this.route("dashboard/stripe", {
+    controller: ShopAdminController,
+    path: "dashboard/stripe",
+    template: "stripe",
     waitOn: function() {
       return ReactionCore.Subscriptions.Packages;
     }

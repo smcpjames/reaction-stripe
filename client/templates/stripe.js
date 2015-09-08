@@ -6,6 +6,14 @@ Template.stripeSettings.helpers({
   }
 });
 
+Template.stripe.helpers({
+  packageData: function() {
+    return ReactionCore.Collections.Packages.findOne({
+      name: "reaction-stripe"
+    });
+  }
+});
+
 AutoForm.hooks({
   "stripe-update-form": {
     onSuccess: function(operation, result, template) {
