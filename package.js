@@ -1,11 +1,11 @@
 Package.describe({
   summary: "Reaction Stripe - Stripe payments for Reaction Commerce",
   name: "reactioncommerce:reaction-stripe",
-  version: "2.1.0",
+  version: "2.1.1",
   git: "https://github.com/reactioncommerce/reaction-stripe.git"
 });
 
-Npm.depends({'stripe': '3.7.2'});
+Npm.depends({'stripe': '3.7.1'});
 
 Package.onUse(function (api, where) {
   api.versionsFrom('METEOR@1.2');
