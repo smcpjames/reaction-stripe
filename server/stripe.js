@@ -43,7 +43,7 @@ Meteor.methods({
         });
       }
     }, function(e) {
-      ReactionCore.Events.warn(e);
+      ReactionCore.Log.warn(e);
     }));
     return fut.wait();
   },
@@ -65,7 +65,7 @@ Meteor.methods({
         });
       }
     }, function(e) {
-      ReactionCore.Events.warn(e);
+      ReactionCore.Log.warn(e);
     }));
     return fut.wait();
   }
