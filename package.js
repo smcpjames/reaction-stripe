@@ -5,7 +5,7 @@ Package.describe({
   git: "https://github.com/reactioncommerce/reaction-stripe.git"
 });
 
-Npm.depends({'stripe': '3.7.1'});
+Npm.depends({'stripe': '3.7.2'});
 
 Package.onUse(function (api, where) {
   api.versionsFrom('METEOR@1.2');
