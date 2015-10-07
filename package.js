@@ -1,7 +1,7 @@
 Package.describe({
   summary: "Reaction Stripe - Stripe payments for Reaction Commerce",
   name: "reactioncommerce:reaction-stripe",
-  version: "2.1.1",
+  version: "2.2.0",
   git: "https://github.com/reactioncommerce/reaction-stripe.git"
 });
 
@@ -29,7 +29,7 @@ Package.onUse(function (api, where) {
   // meteor add-on packages
 
   api.use("less");
-  api.use("reactioncommerce:core@0.8.0");
+  api.use("reactioncommerce:core@0.9.0");
 
   api.addFiles("server/register.js",["server"]); // register as a reaction package
   api.addFiles("server/stripe.js",["server"]);
