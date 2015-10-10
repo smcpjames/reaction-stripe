@@ -34,11 +34,9 @@ ReactionCore.registerPackage({
       provides: "paymentMethod"
     }
   ],
-  permissions: [
-    {
-      label: "Stripe",
-      permission: "dashboard/payments",
-      group: "Shop Settings"
-    }
-  ]
+  permissions: [{
+    label: "Stripe",
+    permission: "dashboard/payments",
+    group: "Shop Settings"
+  }]
 });
