@@ -1,4 +1,4 @@
-var Fiber, Future, ValidCVV, ValidCardNumber, ValidExpireMonth, ValidExpireYear;
+ var Fiber, Future, ValidCVV, ValidCardNumber, ValidExpireMonth, ValidExpireYear;
 
 Fiber = Npm.require("fibers");
 
@@ -48,7 +48,10 @@ Meteor.methods({
     }));
     return fut.wait();
   },
-  stripeCapture: function (transactionId, captureDetails) {
+  stripeCapture: function(transactionId, captureDetails) {
+    check(transactionId, String);
+    check(captureDetails, Object);
+
     var Stripe, fut;
     Stripe = Npm.require("stripe")(Meteor.Stripe.accountOptions());
     fut = new Future();
