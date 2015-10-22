@@ -1,14 +1,16 @@
 Package.describe({
   summary: "Reaction Stripe - Stripe payments for Reaction Commerce",
   name: "reactioncommerce:reaction-stripe",
-  version: "2.2.0",
+  version: "3.0.1",
   git: "https://github.com/reactioncommerce/reaction-stripe.git"
 });
 
-Npm.depends({'stripe': '3.7.1'});
+Npm.depends({
+  stripe: "4.0.0"
+});
 
-Package.onUse(function (api, where) {
-  api.versionsFrom('METEOR@1.2');
+Package.onUse(function (api) {
+  api.versionsFrom("METEOR@1.2");
 
   // meteor base packages
   api.use("standard-minifiers");
@@ -29,16 +31,16 @@ Package.onUse(function (api, where) {
   // meteor add-on packages
 
   api.use("less");
-  api.use("reactioncommerce:core@0.9.0");
+  api.use("reactioncommerce:core@0.9.2");
 
-  api.addFiles("server/register.js",["server"]); // register as a reaction package
-  api.addFiles("server/stripe.js",["server"]);
+  api.addFiles("server/register.js", ["server"]); // register as a reaction package
+  api.addFiles("server/stripe.js", ["server"]);
 
   api.addFiles([
     "common/collections.js",
     "common/routing.js",
     "lib/stripe.js"
-    ],["client","server"]);
+  ], ["client", "server"]);
 
   api.addFiles([
     "client/templates/stripe.html",
@@ -47,6 +49,5 @@ Package.onUse(function (api, where) {
     "client/templates/cart/checkout/payment/methods/stripe/stripe.html",
     "client/templates/cart/checkout/payment/methods/stripe/stripe.less",
     "client/templates/cart/checkout/payment/methods/stripe/stripe.js"
-    ],
-    ["client"]);
+  ], ["client"]);
 });
