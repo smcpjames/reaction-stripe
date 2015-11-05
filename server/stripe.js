@@ -74,6 +74,68 @@ Meteor.methods({
         ReactionCore.Log.warn(e);
       }));
     return fut.wait();
+  },
+  stripeRefund: function(refundDetails) {
+    check(refundDetails, Object);
+
+    var Stripe, fut;
+    Stripe = Npm.require("stripe")(Meteor.Stripe.accountOptions());
+    fut = new Future();
+    this.unblock();
+    Stripe.refunds.create(refundDetails, Meteor.bindEnvironment(
+      function (error, result) {
+        if (error) {
+          fut["return"]({
+            saved: false,
+            error: error
+          });
+        } else {
+          fut["return"]({
+            saved: true,
+            type: result.object,
+            amount: result.amount / 100,
+            rawTransaction: result
+          });
+        }
+      },
+      function (e) {
+        ReactionCore.Log.warn(e);
+      }));
+    return fut.wait();
+  },
+
+  /**
+   * List refunds
+   * @param  {String} transactionId A transaction id to use as a filter
+   * @return {Future} future
+   */
+  "stripe/refunds/list": function (transactionId) {
+    check(transactionId, String);
+    this.unblock();
+
+    let stripe = Npm.require("stripe")(Meteor.Stripe.accountOptions());
+    let listRefunds = Meteor.wrapAsync(stripe.refunds.list, stripe.refunds);
+    let result;
+
+    try {
+      let refunds = listRefunds({charge: transactionId});
+      result = [];
+      for (let refund of refunds.data) {
+        result.push({
+          type: refund.object,
+          amount: refund.amount / 100,
+          created: refund.created * 1000,
+          currency: refund.currency,
+          raw: refund
+        });
+      }
+    } catch (e) {
+      result = {
+        error: e
+      };
+    }
+
+    return result;
   }
 });
 
