@@ -48,35 +48,51 @@ Meteor.methods({
     }));
     return fut.wait();
   },
-  stripeCapture: function(transactionId, captureDetails) {
-    check(transactionId, String);
-    check(captureDetails, Object);
 
-    var Stripe, fut;
-    Stripe = Npm.require("stripe")(Meteor.Stripe.accountOptions());
-    fut = new Future();
+  /**
+   * Capture a Stripe charge
+   * @see https://stripe.com/docs/api#capture_charge
+   * @param  {Object} paymentMethod A PaymentMethod object
+   * @return {Object} results from Stripe normalized
+   */
+  "stripe/payment/capture": function (paymentMethod) {
+    check(paymentMethod, ReactionCore.Schemas.PaymentMethod);
     this.unblock();
-    Stripe.charges.capture(transactionId, captureDetails, Meteor.bindEnvironment(
-      function (error, result) {
-        if (error) {
-          fut["return"]({
-            saved: false,
-            error: error
-          });
-        } else {
-          fut["return"]({
-            saved: true,
-            response: result
-          });
-        }
-      },
-      function (e) {
-        ReactionCore.Log.warn(e);
-      }));
-    return fut.wait();
+
+    let result;
+    const stripe = Npm.require("stripe")(Meteor.Stripe.accountOptions());
+    const capturePayment = Meteor.wrapAsync(stripe.charges.capture, stripe.charges);
+    const captureDetails = {
+      amount: Math.round(paymentMethod.amount * 100)
+    };
+
+    try {
+      const response = capturePayment(paymentMethod.transactionId, captureDetails);
+      result = {
+        saved: true,
+        response: response
+      };
+    } catch (e) {
+      ReactionCore.Log.warn(e);
+      result = {
+        saved: false,
+        error: e
+      };
+    }
+
+    return result;
   },
-  stripeRefund: function(refundDetails) {
-    check(refundDetails, Object);
+
+  "stripe/refund/create": function(paymentMethod, amount) {
+    check(paymentMethod, ReactionCore.Schemas.PaymentMethod);
+    check(amount, Number);
+
+
+    let refundDetails = {
+      charge: paymentMethod.transactionId,
+      amount: Math.round(amount * 100),
+      reason: "requested_by_customer"
+    };
 
     var Stripe, fut;
     Stripe = Npm.require("stripe")(Meteor.Stripe.accountOptions());
@@ -106,11 +122,11 @@ Meteor.methods({
 
   /**
    * List refunds
-   * @param  {String} transactionId A transaction id to use as a filter
-   * @return {Future} future
+   * @param  {Object} paymentMethod object
+   * @return {Object} result
    */
-  "stripe/refunds/list": function (transactionId) {
-    check(transactionId, String);
+  "stripe/refund/list": function (paymentMethod) {
+    check(paymentMethod, ReactionCore.Schemas.PaymentMethod);
     this.unblock();
 
     let stripe = Npm.require("stripe")(Meteor.Stripe.accountOptions());
@@ -118,7 +134,7 @@ Meteor.methods({
     let result;
 
     try {
-      let refunds = listRefunds({charge: transactionId});
+      let refunds = listRefunds({charge: paymentMethod.transactionId});
       result = [];
       for (let refund of refunds.data) {
         result.push({
