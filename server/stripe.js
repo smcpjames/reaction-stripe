@@ -48,15 +48,57 @@ Meteor.methods({
     }));
     return fut.wait();
   },
-  stripeCapture: function(transactionId, captureDetails) {
-    check(transactionId, String);
-    check(captureDetails, Object);
+
+  /**
+   * Capture a Stripe charge
+   * @see https://stripe.com/docs/api#capture_charge
+   * @param  {Object} paymentMethod A PaymentMethod object
+   * @return {Object} results from Stripe normalized
+   */
+  "stripe/payment/capture": function (paymentMethod) {
+    check(paymentMethod, ReactionCore.Schemas.PaymentMethod);
+    this.unblock();
+
+    let result;
+    const stripe = Npm.require("stripe")(Meteor.Stripe.accountOptions());
+    const capturePayment = Meteor.wrapAsync(stripe.charges.capture, stripe.charges);
+    const captureDetails = {
+      amount: Math.round(paymentMethod.amount * 100)
+    };
+
+    try {
+      const response = capturePayment(paymentMethod.transactionId, captureDetails);
+      result = {
+        saved: true,
+        response: response
+      };
+    } catch (e) {
+      ReactionCore.Log.warn(e);
+      result = {
+        saved: false,
+        error: e
+      };
+    }
+
+    return result;
+  },
+
+  "stripe/refund/create": function(paymentMethod, amount) {
+    check(paymentMethod, ReactionCore.Schemas.PaymentMethod);
+    check(amount, Number);
+
+
+    let refundDetails = {
+      charge: paymentMethod.transactionId,
+      amount: Math.round(amount * 100),
+      reason: "requested_by_customer"
+    };
 
     var Stripe, fut;
     Stripe = Npm.require("stripe")(Meteor.Stripe.accountOptions());
     fut = new Future();
     this.unblock();
-    Stripe.charges.capture(transactionId, captureDetails, Meteor.bindEnvironment(
+    Stripe.refunds.create(refundDetails, Meteor.bindEnvironment(
       function (error, result) {
         if (error) {
           fut["return"]({
@@ -66,7 +108,9 @@ Meteor.methods({
         } else {
           fut["return"]({
             saved: true,
-            response: result
+            type: result.object,
+            amount: result.amount / 100,
+            rawTransaction: result
           });
         }
       },
@@ -74,6 +118,40 @@ Meteor.methods({
         ReactionCore.Log.warn(e);
       }));
     return fut.wait();
+  },
+
+  /**
+   * List refunds
+   * @param  {Object} paymentMethod object
+   * @return {Object} result
+   */
+  "stripe/refund/list": function (paymentMethod) {
+    check(paymentMethod, ReactionCore.Schemas.PaymentMethod);
+    this.unblock();
+
+    let stripe = Npm.require("stripe")(Meteor.Stripe.accountOptions());
+    let listRefunds = Meteor.wrapAsync(stripe.refunds.list, stripe.refunds);
+    let result;
+
+    try {
+      let refunds = listRefunds({charge: paymentMethod.transactionId});
+      result = [];
+      for (let refund of refunds.data) {
+        result.push({
+          type: refund.object,
+          amount: refund.amount / 100,
+          created: refund.created * 1000,
+          currency: refund.currency,
+          raw: refund
+        });
+      }
+    } catch (e) {
+      result = {
+        error: e
+      };
+    }
+
+    return result;
   }
 });
 
