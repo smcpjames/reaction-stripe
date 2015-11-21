@@ -1,7 +1,7 @@
 Package.describe({
   summary: "Reaction Stripe - Stripe payments for Reaction Commerce",
   name: "reactioncommerce:reaction-stripe",
-  version: "3.0.1",
+  version: "3.0.2",
   git: "https://github.com/reactioncommerce/reaction-stripe.git"
 });
 
@@ -13,10 +13,9 @@ Package.onUse(function (api) {
   api.versionsFrom("METEOR@1.2");
 
   // meteor base packages
-  api.use("standard-minifiers");
-  api.use("mobile-experience");
   api.use("meteor-base");
   api.use("mongo");
+  api.use("ecmascript");
   api.use("blaze-html-templates");
   api.use("session");
   api.use("jquery");
@@ -27,15 +26,12 @@ Package.onUse(function (api) {
   api.use("ejson");
   api.use("spacebars");
   api.use("check");
-
-  // meteor add-on packages
-
   api.use("less");
+
   api.use("reactioncommerce:core@0.9.2");
 
   api.addFiles("server/register.js", ["server"]); // register as a reaction package
   api.addFiles("server/stripe.js", ["server"]);
-
   api.addFiles([
     "common/collections.js",
     "common/routing.js",
