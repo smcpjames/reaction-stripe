@@ -14,6 +14,12 @@ Template.stripe.helpers({
   }
 });
 
+Template.stripe.events({
+  "click [data-event-action=showStripeSettings]": function () {
+    ReactionCore.showActionView();
+  }
+});
+
 AutoForm.hooks({
   "stripe-update-form": {
     onSuccess: function(operation, result, template) {
