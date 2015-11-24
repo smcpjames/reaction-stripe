@@ -26,7 +26,7 @@ Package.onUse(function (api) {
   api.use("ejson");
   api.use("spacebars");
   api.use("check");
-  api.use("less");
+
 
   api.use("reactioncommerce:core@0.9.2");
 
@@ -40,7 +40,6 @@ Package.onUse(function (api) {
 
   api.addFiles([
     "client/templates/stripe.html",
-    "client/templates/stripe.less",
     "client/templates/stripe.js",
     "client/templates/cart/checkout/payment/methods/stripe/stripe.html",
     "client/templates/cart/checkout/payment/methods/stripe/stripe.less",
