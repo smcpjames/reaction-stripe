@@ -1,7 +1,7 @@
 Package.describe({
   summary: "Reaction Stripe - Stripe payments for Reaction Commerce",
   name: "reactioncommerce:reaction-stripe",
-  version: "3.0.2",
+  version: "3.0.3",
   git: "https://github.com/reactioncommerce/reaction-stripe.git"
 });
 
@@ -28,7 +28,7 @@ Package.onUse(function (api) {
   api.use("check");
 
 
-  api.use("reactioncommerce:core@0.9.2");
+  api.use("reactioncommerce:core@0.11.0");
 
   api.addFiles("server/register.js", ["server"]); // register as a reaction package
   api.addFiles("server/stripe.js", ["server"]);
