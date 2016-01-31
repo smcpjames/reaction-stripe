@@ -28,7 +28,7 @@ Package.onUse(function (api) {
   api.use("check");
 
 
-  api.use("reactioncommerce:core@0.11.0");
+  api.use("reactioncommerce:core@0.12.0");
 
   api.addFiles("server/register.js", ["server"]); // register as a reaction package
   api.addFiles("server/stripe.js", ["server"]);

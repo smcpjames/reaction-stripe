@@ -12,10 +12,10 @@ ReactionCore.registerPackage({
     {
       provides: "dashboard",
       label: "Stripe",
-      description: "Stripe Payment for Reaction Commerce",
+      description: "Stripe payments",
       route: "dashboard/stripe",
       icon: "fa fa-cc-stripe",
-      cycle: "3",
+      cycle: "2",
       container: "dashboard"
     },
 
