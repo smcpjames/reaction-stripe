@@ -13,7 +13,6 @@ ReactionCore.registerPackage({
       provides: "dashboard",
       label: "Stripe",
       description: "Stripe payments",
-      route: "dashboard/stripe",
       icon: "fa fa-cc-stripe",
       cycle: "2",
       container: "dashboard"
