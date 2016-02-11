@@ -14,7 +14,7 @@ ReactionCore.registerPackage({
       label: "Stripe",
       description: "Stripe payments",
       icon: "fa fa-cc-stripe",
-      cycle: "2",
+      priority: 2,
       container: "dashboard"
     },
 
@@ -32,10 +32,5 @@ ReactionCore.registerPackage({
       template: "stripePaymentForm",
       provides: "paymentMethod"
     }
-  ],
-  permissions: [{
-    label: "Stripe",
-    permission: "dashboard/payments",
-    group: "Shop Settings"
-  }]
+  ]
 });
