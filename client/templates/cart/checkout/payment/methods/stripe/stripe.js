@@ -44,7 +44,7 @@ AutoForm.addHooks("stripe-payment-form", {
     storedCard = form.type.charAt(0).toUpperCase() + form.type.slice(1) + " " + doc.cardNumber.slice(-4);
     Meteor.Stripe.authorize(form, {
       total: ReactionCore.Collections.Cart.findOne().cartTotal(),
-      currency: Shops.findOne().currency
+      currency: ReactionCore.Collections.Shops.findOne().currency
     }, function(error, transaction) {
       var normalizedMode, normalizedStatus, paymentMethod;
       submitting = false;
