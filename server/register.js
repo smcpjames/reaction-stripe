@@ -15,7 +15,7 @@ ReactionCore.registerPackage({
       description: "Stripe payments",
       icon: "fa fa-cc-stripe",
       priority: 2,
-      container: "dashboard"
+      container: "paymentMethod"
     },
 
     // Settings panel
