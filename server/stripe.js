@@ -21,10 +21,8 @@ const ValidCVV = Match.Where(function (x) {
 });
 
 
-
 Meteor.methods({
   "stripeSubmit": function (transactionType, cardData, paymentData) {
-    var fut;
     check(transactionType, String);
     check(cardData, {
       name: String,
@@ -45,9 +43,9 @@ Meteor.methods({
     chargeObj.card = Meteor.Stripe.parseCardData(cardData);
     chargeObj.amount = Math.round(paymentData.total * 100);
     chargeObj.currency = paymentData.currency;
-    fut = new Future();
+    let fut = new Future();
     this.unblock();
-    let stripe = StripeApi(Meteor.Stripe.accountOptions());
+    let stripe = StripeApi.methods.getInstance.run();
     stripe.charges.create(chargeObj, Meteor.bindEnvironment(function (
       error, result) {
       if (error) {

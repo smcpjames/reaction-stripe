@@ -30,10 +30,11 @@ Package.onUse(function (api) {
 
   api.use("reactioncommerce:core@0.11.0");
 
-  api.imply("mdg:validated-method");
+  api.imply("mdg:validated-method@1.0.1");
 
   api.addFiles("server/register.js", ["server"]); // register as a reaction package
   api.addFiles("server/stripe.js", ["server"]);
+  api.addFiles("server/stripeapi.js", ["server"]);
   api.addFiles([
     "common/collections.js",
     "common/routing.js",

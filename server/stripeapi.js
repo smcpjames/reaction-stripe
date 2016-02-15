@@ -1,12 +1,15 @@
-class StripeApi {
-  constructor(apiKey = null) {
-    let stripeInstance;
-    if (apiKey !== null) {
-      stripeInstance = Npm.require("stripe")(apiKey);
-    } else {
-      const dynamicApiKey = Meteor.Stripe.accountOptions();
-      stripeInstance = Npm.require("stripe")(dynamicApiKey);
-    }
+StripeApi = {};
+StripeApi.methods = {};
+
+
+StripeApi.methods.getInstance = new ValidatedMethod({
+  name: "StripeApi.methods.getInstance",
+  validate: new SimpleSchema({
+    apiKey: { type: String }
+  }).validator(),
+  run({ apikey }) {
+    const dyanmicApiKey = Meteor.Stripe.accountOptions();
+    let stripeInstance = Npm.require("stripe")(dyanmicApiKey);
     return stripeInstance;
   }
-}
+});
