@@ -1,12 +1,12 @@
 Package.describe({
   summary: "Reaction Stripe - Stripe payments for Reaction Commerce",
   name: "reactioncommerce:reaction-stripe",
-  version: "3.0.3",
+  version: "3.0.4",
   git: "https://github.com/reactioncommerce/reaction-stripe.git"
 });
 
 Npm.depends({
-  stripe: "4.0.0"
+  stripe: "4.4.0"
 });
 
 Package.onUse(function (api) {
@@ -30,6 +30,8 @@ Package.onUse(function (api) {
 
   api.use("reactioncommerce:core@0.11.0");
 
+  api.imply("mdg:validated-method");
+
   api.addFiles("server/register.js", ["server"]); // register as a reaction package
   api.addFiles("server/stripe.js", ["server"]);
   api.addFiles([
@@ -45,4 +47,6 @@ Package.onUse(function (api) {
     "client/templates/cart/checkout/payment/methods/stripe/stripe.less",
     "client/templates/cart/checkout/payment/methods/stripe/stripe.js"
   ], ["client"]);
+
+  api.export("StripeApi", "server");
 });

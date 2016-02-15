@@ -1,12 +1,30 @@
- var Fiber, Future, ValidCVV, ValidCardNumber, ValidExpireMonth, ValidExpireYear;
+/* eslint camelcase: 0 */
 
-Fiber = Npm.require("fibers");
+const Fiber = Npm.require("fibers");
+const Future = Npm.require("fibers/future");
+// const Stripe = Npm.require("stripe")(Meteor.Stripe.accountOptions());
 
-Future = Npm.require("fibers/future");
+const ValidCardNumber = Match.Where(function (x) {
+  return /^[0-9]{14,16}$/.test(x);
+});
+
+const ValidExpireMonth = Match.Where(function (x) {
+  return /^[0-9]{1,2}$/.test(x);
+});
+
+const ValidExpireYear = Match.Where(function (x) {
+  return /^[0-9]{4}$/.test(x);
+});
+
+const ValidCVV = Match.Where(function (x) {
+  return /^[0-9]{3,4}$/.test(x);
+});
+
+
 
 Meteor.methods({
-  stripeSubmit: function (transactionType, cardData, paymentData) {
-    var Stripe, chargeObj, fut;
+  "stripeSubmit": function (transactionType, cardData, paymentData) {
+    var fut;
     check(transactionType, String);
     check(cardData, {
       name: String,
@@ -20,8 +38,7 @@ Meteor.methods({
       total: String,
       currency: String
     });
-    Stripe = Npm.require("stripe")(Meteor.Stripe.accountOptions());
-    chargeObj = Meteor.Stripe.chargeObj();
+    let chargeObj = Meteor.Stripe.chargeObj();
     if (transactionType === "authorize") {
       chargeObj.capture = false;
     }
@@ -30,7 +47,8 @@ Meteor.methods({
     chargeObj.currency = paymentData.currency;
     fut = new Future();
     this.unblock();
-    Stripe.charges.create(chargeObj, Meteor.bindEnvironment(function (
+    let stripe = StripeApi(Meteor.Stripe.accountOptions());
+    stripe.charges.create(chargeObj, Meteor.bindEnvironment(function (
       error, result) {
       if (error) {
         fut["return"]({
@@ -155,18 +173,3 @@ Meteor.methods({
   }
 });
 
-ValidCardNumber = Match.Where(function (x) {
-  return /^[0-9]{14,16}$/.test(x);
-});
-
-ValidExpireMonth = Match.Where(function (x) {
-  return /^[0-9]{1,2}$/.test(x);
-});
-
-ValidExpireYear = Match.Where(function (x) {
-  return /^[0-9]{4}$/.test(x);
-});
-
-ValidCVV = Match.Where(function (x) {
-  return /^[0-9]{3,4}$/.test(x);
-});
