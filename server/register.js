@@ -21,7 +21,7 @@ ReactionCore.registerPackage({
     // Settings panel
     {
       label: "Stripe Settings",
-      route: "dashboard/stripe",
+      route: "/dashboard/stripe",
       provides: "settings",
       container: "dashboard",
       template: "stripeSettings",
