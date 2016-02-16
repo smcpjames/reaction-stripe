@@ -30,6 +30,9 @@ Package.onUse(function (api) {
 
   api.use("reactioncommerce:core@0.11.0");
 
+  api.use("mdg:validated-method@1.0.1");
+  api.use("jeremy:stripe@1.2.0");
+
   api.imply("mdg:validated-method@1.0.1");
 
   api.addFiles("server/register.js", ["server"]); // register as a reaction package

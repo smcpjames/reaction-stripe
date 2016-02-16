@@ -13,3 +13,13 @@ StripeApi.methods.getInstance = new ValidatedMethod({
     return stripeInstance;
   }
 });
+
+StripeApi.methods.createCharge = new ValidatedMethod({
+  name: "StripeApi.methods.createCharge",
+  validate: new SimpleSchema({
+    chargeObj: { type: Object }
+  }).validator(),
+  run({ chargeObj }) {
+    //
+  }
+});

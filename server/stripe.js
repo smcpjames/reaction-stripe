@@ -43,26 +43,29 @@ Meteor.methods({
     chargeObj.card = Meteor.Stripe.parseCardData(cardData);
     chargeObj.amount = Math.round(paymentData.total * 100);
     chargeObj.currency = paymentData.currency;
-    let fut = new Future();
-    this.unblock();
-    let stripe = StripeApi.methods.getInstance.run();
-    stripe.charges.create(chargeObj, Meteor.bindEnvironment(function (
-      error, result) {
-      if (error) {
-        fut["return"]({
-          saved: false,
-          error: error
-        });
-      } else {
-        fut["return"]({
+    const dyanmicApiKey = Meteor.Stripe.accountOptions();
+    const stripe = StripeSync(dyanmicApiKey);
+    let chargeResult = stripe.charges.create(chargeObj);
+    let result;
+    try {
+      if (chargeResult.status === "succeeded") {
+        result = {
           saved: true,
-          response: result
-        });
+          response: chargeResult
+        };
+      } else {
+        result = {
+          saved: false,
+          response: chargeResult
+        };
       }
-    }, function (e) {
-      ReactionCore.Log.warn(e);
-    }));
-    return fut.wait();
+
+      return result;
+    }
+    catch (error) {
+      ReactionCore.Log.warn(error);
+    }
+
   },
 
   /**
@@ -76,7 +79,7 @@ Meteor.methods({
     this.unblock();
 
     let result;
-    const stripe = Npm.require("stripe")(Meteor.Stripe.accountOptions());
+    const stripe = StripeApi.methods.getInstance.run();
     const capturePayment = Meteor.wrapAsync(stripe.charges.capture, stripe.charges);
     const captureDetails = {
       amount: Math.round(paymentMethod.amount * 100)
@@ -99,7 +102,7 @@ Meteor.methods({
     return result;
   },
 
-  "stripe/refund/create": function(paymentMethod, amount) {
+  "stripe/refund/create": function (paymentMethod, amount) {
     check(paymentMethod, ReactionCore.Schemas.PaymentMethod);
     check(amount, Number);
 
@@ -110,11 +113,10 @@ Meteor.methods({
       reason: "requested_by_customer"
     };
 
-    var Stripe, fut;
-    Stripe = Npm.require("stripe")(Meteor.Stripe.accountOptions());
-    fut = new Future();
+    let stripe = StripeApi.methods.getInstance.run();
+    let fut = new Future();
     this.unblock();
-    Stripe.refunds.create(refundDetails, Meteor.bindEnvironment(
+    stripe.refunds.create(refundDetails, Meteor.bindEnvironment(
       function (error, result) {
         if (error) {
           fut["return"]({
@@ -145,7 +147,7 @@ Meteor.methods({
     check(paymentMethod, ReactionCore.Schemas.PaymentMethod);
     this.unblock();
 
-    let stripe = Npm.require("stripe")(Meteor.Stripe.accountOptions());
+    let stripe = StripeApi.methods.getInstance.run();
     let listRefunds = Meteor.wrapAsync(stripe.refunds.list, stripe.refunds);
     let result;
 

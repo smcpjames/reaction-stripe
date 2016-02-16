@@ -7,7 +7,7 @@ let paymentMethod = {
 };
 
 
-describe("GenericAPI", function () {
+xdescribe("GenericAPI", function () {
   it("should return data from ThirdPartyAPI authorize", function (done) {
     let cardData = {
       name: "Test User",
@@ -46,7 +46,7 @@ describe("GenericAPI", function () {
 });
 
 
-describe("Submit payment", function () {
+xdescribe("Submit payment", function () {
   it("should call Generic API with card and payment data", function (done) {
     let cardData = {
       name: "Test User",
@@ -99,7 +99,7 @@ describe("Submit payment", function () {
   });
 });
 
-describe("Capture payment", function () {
+xdescribe("Capture payment", function () {
   it("should call GenericAPI with transaction ID", function (done) {
     let captureResults = { success: true };
     let authorizationId = "abc1234";
@@ -129,7 +129,7 @@ describe("Capture payment", function () {
   });
 });
 
-describe("Refund", function () {
+xdescribe("Refund", function () {
   it("should call GenericAPI with transaction ID", function (done) {
     let refundResults = { success: true };
     let transactionId = "abc1234";
