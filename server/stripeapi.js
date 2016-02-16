@@ -13,10 +13,14 @@ cardSchema = new SimpleSchema({
 });
 
 chargeObjectSchema = new SimpleSchema({
-  amount: {type: Number},
+  amount: { type: Number },
   currency: {type: String},
   card: { type: cardSchema },
   capture: { type: Boolean }
+});
+
+captureDetailsSchema = new SimpleSchema({
+  amount: { type: Number }
 });
 
 StripeApi.methods.getApiKey = new ValidatedMethod({
@@ -42,5 +46,19 @@ StripeApi.methods.createCharge = new ValidatedMethod({
     const stripe = StripeSync(dyanmicApiKey);
     let chargeResult = stripe.charges.create(chargeObj);
     return chargeResult;
+  }
+});
+
+StripeApi.methods.captureCharge = new ValidatedMethod({
+  name: "StripeApi.methods.captureCharge",
+  validate: new SimpleSchema({
+    transactionId: { type: String },
+    captureDetails: { type: captureDetailsSchema }
+  }).validator(),
+  run({ transactionId, captureDetails })  {
+    const dyanmicApiKey = StripeApi.methods.getApiKey.call();
+    const stripe = StripeSync(dyanmicApiKey);
+    let captureResults = stripe.charges.capture(transactionId, captureDetails);
+    return captureResults;
   }
 });

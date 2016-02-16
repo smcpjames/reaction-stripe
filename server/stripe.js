@@ -72,21 +72,28 @@ Meteor.methods({
    */
   "stripe/payment/capture": function (paymentMethod) {
     check(paymentMethod, ReactionCore.Schemas.PaymentMethod);
-    this.unblock();
-
     let result;
-    const stripe = StripeApi.methods.getInstance.run();
-    const capturePayment = Meteor.wrapAsync(stripe.charges.capture, stripe.charges);
+    let captureResult;
     const captureDetails = {
       amount: Math.round(paymentMethod.amount * 100)
     };
 
     try {
-      const response = capturePayment(paymentMethod.transactionId, captureDetails);
-      result = {
-        saved: true,
-        response: response
-      };
+      captureResult = StripeApi.methods.captureCharge.call({
+        transactionId: paymentMethod.transactionId,
+        captureDetails: captureDetails
+      });
+      if (captureResult.status === "succeeded") {
+        result = {
+          saved: true,
+          response: captureResult
+        };
+      } else {
+        result = {
+          saved: false,
+          response: captureResult
+        };
+      }
     } catch (e) {
       ReactionCore.Log.warn(e);
       result = {
@@ -94,15 +101,12 @@ Meteor.methods({
         error: e
       };
     }
-
     return result;
   },
 
   "stripe/refund/create": function (paymentMethod, amount) {
     check(paymentMethod, ReactionCore.Schemas.PaymentMethod);
     check(amount, Number);
-
-
     let refundDetails = {
       charge: paymentMethod.transactionId,
       amount: Math.round(amount * 100),
