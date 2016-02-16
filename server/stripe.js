@@ -2,7 +2,6 @@
 
 const Fiber = Npm.require("fibers");
 const Future = Npm.require("fibers/future");
-// const Stripe = Npm.require("stripe")(Meteor.Stripe.accountOptions());
 
 const ValidCardNumber = Match.Where(function (x) {
   return /^[0-9]{14,16}$/.test(x);
@@ -43,11 +42,10 @@ Meteor.methods({
     chargeObj.card = Meteor.Stripe.parseCardData(cardData);
     chargeObj.amount = Math.round(paymentData.total * 100);
     chargeObj.currency = paymentData.currency;
-    const dyanmicApiKey = Meteor.Stripe.accountOptions();
-    const stripe = StripeSync(dyanmicApiKey);
-    let chargeResult = stripe.charges.create(chargeObj);
     let result;
+    let chargeResult;
     try {
+      chargeResult = StripeApi.methods.createCharge.call({chargeObj: chargeObj});
       if (chargeResult.status === "succeeded") {
         result = {
           saved: true,
@@ -59,13 +57,11 @@ Meteor.methods({
           response: chargeResult
         };
       }
-
       return result;
     }
     catch (error) {
       ReactionCore.Log.warn(error);
     }
-
   },
 
   /**
