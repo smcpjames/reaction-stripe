@@ -23,6 +23,12 @@ captureDetailsSchema = new SimpleSchema({
   amount: { type: Number }
 });
 
+refundDetailsSchema = new SimpleSchema({
+  charge: { type: String },
+  amount: { type: Number },
+  reason: { type: String }
+});
+
 StripeApi.methods.getApiKey = new ValidatedMethod({
   name: "StripeApi.methods.getApiKey",
   validate: null,
@@ -60,5 +66,18 @@ StripeApi.methods.captureCharge = new ValidatedMethod({
     const stripe = StripeSync(dyanmicApiKey);
     let captureResults = stripe.charges.capture(transactionId, captureDetails);
     return captureResults;
+  }
+});
+
+StripeApi.methods.createRefund = new ValidatedMethod({
+  name: "StripeApi.methods.createRefund",
+  validate: new SimpleSchema({
+    refundDetails: { type: refundDetailsSchema }
+  }).validator(),
+  run({ refundDetails }) {
+    const dyanmicApiKey = StripeApi.methods.getApiKey.call();
+    const stripe = StripeSync(dyanmicApiKey);
+    let refundResults = stripe.refunds.create(refundDetails);
+    return refundResults;
   }
 });

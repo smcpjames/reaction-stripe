@@ -112,30 +112,20 @@ Meteor.methods({
       amount: Math.round(amount * 100),
       reason: "requested_by_customer"
     };
-
-    let stripe = StripeApi.methods.getInstance.run();
-    let fut = new Future();
-    this.unblock();
-    stripe.refunds.create(refundDetails, Meteor.bindEnvironment(
-      function (error, result) {
-        if (error) {
-          fut["return"]({
-            saved: false,
-            error: error
-          });
-        } else {
-          fut["return"]({
-            saved: true,
-            type: result.object,
-            amount: result.amount / 100,
-            rawTransaction: result
-          });
-        }
-      },
-      function (e) {
-        ReactionCore.Log.warn(e);
-      }));
-    return fut.wait();
+    let result;
+    let refundResult = StripeApi.methods.createRefund.call({ refundDetails: refundDetails });
+    if (refundResult.object === "refund") {
+      result = {
+        saved: true,
+        response: refundResult
+      };
+    } else {
+      result = {
+        saved: false,
+        response: refundResult
+      };
+    }
+    return result;
   },
 
   /**
