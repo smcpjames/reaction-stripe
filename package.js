@@ -1,7 +1,7 @@
 Package.describe({
   summary: "Reaction Stripe - Stripe payments for Reaction Commerce",
   name: "reactioncommerce:reaction-stripe",
-  version: "3.1.0",
+  version: "3.1.1",
   git: "https://github.com/reactioncommerce/reaction-stripe.git"
 });
 
