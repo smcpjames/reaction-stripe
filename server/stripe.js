@@ -91,11 +91,11 @@ Meteor.methods({
           response: captureResult
         };
       }
-    } catch (e) {
-      ReactionCore.Log.warn(e);
+    } catch (error) {
+      ReactionCore.Log.warn(error);
       result = {
         saved: false,
-        error: e
+        error: error
       };
     }
     return result;
@@ -110,18 +110,27 @@ Meteor.methods({
       reason: "requested_by_customer"
     };
     let result;
-    let refundResult = StripeApi.methods.createRefund.call({ refundDetails: refundDetails });
-    if (refundResult.object === "refund") {
-      result = {
-        saved: true,
-        response: refundResult
-      };
-    } else {
+    try {
+      let refundResult = StripeApi.methods.createRefund.call({ refundDetails: refundDetails });
+      if (refundResult.object === "refund") {
+        result = {
+          saved: true,
+          response: refundResult
+        };
+      } else {
+        result = {
+          saved: false,
+          response: refundResult
+        };
+      }
+    } catch (error) {
+      ReactionCore.Log.warn(error);
       result = {
         saved: false,
-        response: refundResult
+        error: error
       };
     }
+
     return result;
   },
 
