@@ -1,7 +1,5 @@
 /* eslint camelcase: 0 */
 
-const Fiber = Npm.require("fibers");
-const Future = Npm.require("fibers/future");
 
 const ValidCardNumber = Match.Where(function (x) {
   return /^[0-9]{14,16}$/.test(x);
@@ -58,8 +56,7 @@ Meteor.methods({
         };
       }
       return result;
-    }
-    catch (error) {
+    } catch (error) {
       ReactionCore.Log.warn(error);
     }
   },
@@ -135,14 +132,9 @@ Meteor.methods({
    */
   "stripe/refund/list": function (paymentMethod) {
     check(paymentMethod, ReactionCore.Schemas.PaymentMethod);
-    this.unblock();
-
-    let stripe = StripeApi.methods.getInstance.run();
-    let listRefunds = Meteor.wrapAsync(stripe.refunds.list, stripe.refunds);
     let result;
-
     try {
-      let refunds = listRefunds({charge: paymentMethod.transactionId});
+      let refunds = StripeApi.methods.listRefunds.call({ transactionId: paymentMethod.transactionId });
       result = [];
       for (let refund of refunds.data) {
         result.push({
@@ -153,12 +145,12 @@ Meteor.methods({
           raw: refund
         });
       }
-    } catch (e) {
+    } catch (error) {
+      ReactionCore.Log.warn(error);
       result = {
-        error: e
+        error: error
       };
     }
-
     return result;
   }
 });

@@ -81,3 +81,16 @@ StripeApi.methods.createRefund = new ValidatedMethod({
     return refundResults;
   }
 });
+
+StripeApi.methods.listRefunds = new ValidatedMethod({
+  name: "StripeApi.methods.listRefunds",
+  validate: new SimpleSchema({
+    transactionId: { type: String }
+  }).validator(),
+  run({ transactionId }) {
+    const dyanmicApiKey = StripeApi.methods.getApiKey.call();
+    const stripe = StripeSync(dyanmicApiKey);
+    let refundListResults = stripe.refunds.list({ charge: transactionId });
+    return refundListResults;
+  }
+});
