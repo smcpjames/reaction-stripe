@@ -12,17 +12,16 @@ ReactionCore.registerPackage({
     {
       provides: "dashboard",
       label: "Stripe",
-      description: "Stripe Payment for Reaction Commerce",
-      route: "dashboard/stripe",
+      description: "Stripe payments",
       icon: "fa fa-cc-stripe",
-      cycle: "3",
-      container: "dashboard"
+      priority: 2,
+      container: "paymentMethod"
     },
 
     // Settings panel
     {
       label: "Stripe Settings",
-      route: "dashboard/stripe",
+      route: "/dashboard/stripe",
       provides: "settings",
       container: "dashboard",
       template: "stripeSettings",
@@ -33,10 +32,5 @@ ReactionCore.registerPackage({
       template: "stripePaymentForm",
       provides: "paymentMethod"
     }
-  ],
-  permissions: [{
-    label: "Stripe",
-    permission: "dashboard/payments",
-    group: "Shop Settings"
-  }]
+  ]
 });
