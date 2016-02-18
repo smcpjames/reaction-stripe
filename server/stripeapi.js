@@ -26,6 +26,7 @@ captureDetailsSchema = new SimpleSchema({
 refundDetailsSchema = new SimpleSchema({
   charge: { type: String },
   amount: { type: Number },
+  metadata: { type: String, optional: true },
   reason: { type: String }
 });
 
@@ -87,10 +88,15 @@ StripeApi.methods.createRefund = new ValidatedMethod({
     refundDetails: { type: refundDetailsSchema },
     apiKey: { type: String, optional: true }
   }).validator(),
-  run({ refundDetails }) {
-    const dyanmicApiKey = StripeApi.methods.getApiKey.call();
-    const stripe = StripeSync(dyanmicApiKey);
-    let refundResults = stripe.refunds.create(refundDetails);
+  run({ refundDetails, apiKey }) {
+    let stripe;
+    if (!apiKey) {
+      const dynamicApiKey = StripeApi.methods.getApiKey.call();
+      stripe = StripeSync(dynamicApiKey);
+    } else {
+      stripe = StripeSync(apiKey);
+    }
+    let refundResults = stripe.refunds.create({ charge: refundDetails.charge });
     return refundResults;
   }
 });
