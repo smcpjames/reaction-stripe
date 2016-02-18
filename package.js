@@ -53,3 +53,27 @@ Package.onUse(function (api) {
 
   api.export("StripeApi", "server");
 });
+
+Package.onTest(function (api) {
+  api.use("underscore");
+  api.use("random");
+  api.use("sanjo:jasmine@0.21.0");
+  api.use("velocity:html-reporter@0.9.1");
+  api.use("velocity:console-reporter@0.1.4");
+
+  api.use("accounts-base");
+  api.use("accounts-password");
+
+  // reaction core
+  api.use("reactioncommerce:reaction-collections");
+  api.use("reactioncommerce:reaction-factories");
+  api.use("reactioncommerce:core");
+  api.use("reactioncommerce:reaction-stripe");
+
+  api.use("jeremy:stripe@1.2.0");
+
+  // server integration tests
+  api.addFiles("tests/jasmine/server/integration/methods.js", "server");
+  api.addFiles("tests/jasmine/server/integration/stripeapi.js", "server");
+});
+

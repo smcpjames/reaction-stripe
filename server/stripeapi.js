@@ -45,11 +45,17 @@ StripeApi.methods.getApiKey = new ValidatedMethod({
 StripeApi.methods.createCharge = new ValidatedMethod({
   name: "StripeApi.methods.createCharge",
   validate: new SimpleSchema({
-    chargeObj: { type: chargeObjectSchema }
+    chargeObj: { type: chargeObjectSchema },
+    apiKey: { type: String }
   }).validator(),
-  run({ chargeObj }) {
-    const dyanmicApiKey = StripeApi.methods.getApiKey.call();
-    const stripe = StripeSync(dyanmicApiKey);
+  run({ chargeObj, apiKey }) {
+    let stripe;
+    if (!apiKey) {
+      const dyanmicApiKey = StripeApi.methods.getApiKey.call();
+      stripe = StripeSync(dyanmicApiKey);
+    } else {
+      stripe = StripeSync(apiKey);
+    }
     let chargeResult = stripe.charges.create(chargeObj);
     return chargeResult;
   }
