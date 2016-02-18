@@ -46,7 +46,7 @@ StripeApi.methods.createCharge = new ValidatedMethod({
   name: "StripeApi.methods.createCharge",
   validate: new SimpleSchema({
     chargeObj: { type: chargeObjectSchema },
-    apiKey: { type: String }
+    apiKey: { type: String, optional: true }
   }).validator(),
   run({ chargeObj, apiKey }) {
     let stripe;
@@ -65,11 +65,17 @@ StripeApi.methods.captureCharge = new ValidatedMethod({
   name: "StripeApi.methods.captureCharge",
   validate: new SimpleSchema({
     transactionId: { type: String },
-    captureDetails: { type: captureDetailsSchema }
+    captureDetails: { type: captureDetailsSchema },
+    apiKey: { type: String, optional: true }
   }).validator(),
-  run({ transactionId, captureDetails })  {
-    const dyanmicApiKey = StripeApi.methods.getApiKey.call();
-    const stripe = StripeSync(dyanmicApiKey);
+  run({ transactionId, captureDetails, apiKey })  {
+    let stripe;
+    if (!apiKey) {
+      const dynamicApiKey = StripeApi.methods.getApiKey.call();
+      stripe = StripeSync(dynamicApiKey);
+    } else {
+      stripe = StripeSync(apiKey);
+    }
     let captureResults = stripe.charges.capture(transactionId, captureDetails);
     return captureResults;
   }
@@ -78,7 +84,8 @@ StripeApi.methods.captureCharge = new ValidatedMethod({
 StripeApi.methods.createRefund = new ValidatedMethod({
   name: "StripeApi.methods.createRefund",
   validate: new SimpleSchema({
-    refundDetails: { type: refundDetailsSchema }
+    refundDetails: { type: refundDetailsSchema },
+    apiKey: { type: String, optional: true }
   }).validator(),
   run({ refundDetails }) {
     const dyanmicApiKey = StripeApi.methods.getApiKey.call();
@@ -91,7 +98,8 @@ StripeApi.methods.createRefund = new ValidatedMethod({
 StripeApi.methods.listRefunds = new ValidatedMethod({
   name: "StripeApi.methods.listRefunds",
   validate: new SimpleSchema({
-    transactionId: { type: String }
+    transactionId: { type: String },
+    apiKey: { type: String, optional: true }
   }).validator(),
   run({ transactionId }) {
     const dyanmicApiKey = StripeApi.methods.getApiKey.call();
