@@ -57,8 +57,13 @@ StripeApi.methods.createCharge = new ValidatedMethod({
     } else {
       stripe = StripeSync(apiKey);
     }
-    let chargeResult = stripe.charges.create(chargeObj);
-    return chargeResult;
+    try {
+      let chargeResult = stripe.charges.create(chargeObj);
+      return chargeResult;
+    } catch (e) {
+      console.log("stripe charge error: " + e);
+      throw new Meteor.Error("error", "charging error")
+    }
   }
 });
 

@@ -106,13 +106,13 @@ describe("Meteor.Stripe.authorize", function () {
 });
 
 describe("Meteor.Stripe.authorize", function () {
-  it("should properly charge a card when using a currency besides USD", function () {
+  it("should return saved = false when card is declined", function () {
     let form = {
       cvv2: "345",
       expire_month: "4",
       expire_year: "2019",
       name: "Test User",
-      number: "4242424242424242",
+      number: "4000000000000002",
       type: "visa"
     };
     let total = "22.98";

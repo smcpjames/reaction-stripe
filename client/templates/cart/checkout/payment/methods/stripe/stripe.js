@@ -18,9 +18,11 @@ handleStripeSubmitError = function (error) {
   let singleError = error;
   let serverError = error !== null ? error.message : void 0;
   if (serverError) {
-    return paymentAlert("Oops! " + serverError);
+    console.log(serverError);
+    return paymentAlert("Oops! Server Error " + serverError);
   } else if (singleError) {
-    return paymentAlert("Oops! " + singleError);
+    console.log(singleError);
+    return paymentAlert("Oops! single Error" + singleError);
   }
 };
 
