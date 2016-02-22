@@ -17,6 +17,22 @@ const ValidCVV = Match.Where(function (x) {
   return /^[0-9]{3,4}$/.test(x);
 });
 
+parseCardData = function (data) {
+  let parsedCardData = {
+    number: data.number,
+    name: data.name,
+    cvc: data.cvv2,
+    exp_month: data.expire_month,
+    exp_year: data.expire_year
+  };
+  return parsedCardData;
+};
+
+// Stripe uses a "Decimal-less" format so 10.00 becomes 1000
+formatForStripe = function (amount) {
+  return Math.round(amount * 100);
+};
+
 
 Meteor.methods({
   "stripeSubmit": function (transactionType, cardData, paymentData) {
@@ -33,12 +49,19 @@ Meteor.methods({
       total: String,
       currency: String
     });
-    let chargeObj = Meteor.Stripe.chargeObj();
+
+    let chargeObj = {
+      amount: "",
+      currency: "",
+      card: {},
+      capture: true
+    };
+
     if (transactionType === "authorize") {
       chargeObj.capture = false;
     }
-    chargeObj.card = Meteor.Stripe.parseCardData(cardData);
-    chargeObj.amount = Math.round(paymentData.total * 100);
+    chargeObj.card = parseCardData(cardData);
+    chargeObj.amount = formatForStripe(paymentData.total);
     chargeObj.currency = paymentData.currency;
     let result;
     let chargeResult;
@@ -111,7 +134,7 @@ Meteor.methods({
     };
     let result;
     try {
-      let refundResult = StripeApi.methods.createRefund.call({ refundDetails: refundDetails });
+      let refundResult = StripeApi.methods.createRefund.call({refundDetails: refundDetails});
       if (refundResult.object === "refund") {
         result = {
           saved: true,
@@ -143,7 +166,7 @@ Meteor.methods({
     check(paymentMethod, ReactionCore.Schemas.PaymentMethod);
     let result;
     try {
-      let refunds = StripeApi.methods.listRefunds.call({ transactionId: paymentMethod.transactionId });
+      let refunds = StripeApi.methods.listRefunds.call({transactionId: paymentMethod.transactionId});
       result = [];
       for (let refund of refunds.data) {
         result.push({
@@ -163,4 +186,3 @@ Meteor.methods({
     return result;
   }
 });
-
