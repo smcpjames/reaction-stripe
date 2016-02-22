@@ -107,9 +107,14 @@ StripeApi.methods.listRefunds = new ValidatedMethod({
     transactionId: { type: String },
     apiKey: { type: String, optional: true }
   }).validator(),
-  run({ transactionId }) {
-    const dyanmicApiKey = StripeApi.methods.getApiKey.call();
-    const stripe = StripeSync(dyanmicApiKey);
+  run({ transactionId, apiKey }) {
+    let stripe;
+    if (!apiKey) {
+      const dynamicApiKey = StripeApi.methods.getApiKey.call();
+      stripe = StripeSync(dynamicApiKey);
+    } else {
+      stripe = StripeSync(apiKey);
+    }
     let refundListResults = stripe.refunds.list({ charge: transactionId });
     return refundListResults;
   }

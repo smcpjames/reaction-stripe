@@ -59,8 +59,8 @@ xdescribe("StripeAPI captureCharge function", function () {
   });
 });
 
-describe("StripeAPI createRefund function", function () {
-  it("should return a result with status = success", function (done) {
+xdescribe("StripeAPI createRefund function", function () {
+  it("should return a result with object = refund", function (done) {
     let apiKey = "";
     let cardObject = {
       number: "4242424242424242",
@@ -90,4 +90,44 @@ describe("StripeAPI createRefund function", function () {
     expect(refundResult.object).toBe("refund");
     done();
   });
+});
+
+xdescribe("StripeAPI listRefund function", function () {
+  it("should return a list of refunds", function (done) {
+    let apiKey = "";
+    let cardObject = {
+      number: "4242424242424242",
+      name: "Test User",
+      cvc: "345",
+      exp_month: "02",
+      exp_year: "2019"
+    };
+    let chargeObject = {
+      amount: 1999,
+      currency: "USD",
+      card: cardObject,
+      capture: true
+    };
+
+    const chargeResult = StripeApi.methods.createCharge.call({ chargeObj: chargeObject, apiKey: apiKey });
+    let refundDetails = {
+      charge: chargeResult.id,
+      amount: 1999,
+      reason: "requested_by_customer"
+    };
+    const refundResult = StripeApi.methods.createRefund.call({
+      refundDetails: refundDetails,
+      apiKey: apiKey
+    });
+
+    expect(refundResult.object).toBe("refund");
+    const refundList = StripeApi.methods.listRefunds.call({
+      transactionId: chargeResult.id,
+      apiKey: apiKey
+    });
+    expect(refundList.object).toBe("list");
+    const firstRefund = refundList.data[0];
+    expect(firstRefund.object).toBe("refund");
+    done();
+  }, 10000);
 });
