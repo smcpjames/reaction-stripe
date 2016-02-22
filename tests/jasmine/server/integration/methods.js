@@ -1,185 +1,145 @@
-let paymentMethod = {
-  processor: "Generic",
-  storedCard: "Visa 4242",
-  status: "captured",
-  mode: "authorize",
-  createdAt: new Date()
+/* eslint camelcase: 0 */
+
+
+let stripeChargeResult = {
+  id: "ch_17hA8DBXXkbZQs3xENUmN9bZ",
+  object: "charge",
+  amount: 2298,
+  amount_refunded: 0,
+  captured: false,
+  created: 1456110785,
+  currency: "usd",
+  refunded: false,
+  shipping: null,
+  source: {
+    id: "card_17hA8DBXXkbZQs3xclGesDrp",
+    object: "card",
+    address_city: null,
+    address_country: null,
+    address_line1: null,
+    address_line1_check: null,
+    address_line2: null,
+    address_state: null,
+    address_zip: null,
+    address_zip_check: null,
+    brand: "Visa",
+    country: "US",
+    customer: null,
+    cvc_check: "pass",
+    dynamic_last4: null,
+    exp_month: 3,
+    exp_year: 2019,
+    fingerprint: "sMf9T3BK8Si2Nqme",
+    funding: "credit",
+    last4: "4242",
+    metadata: {},
+    name: "Test User",
+    tokenization_method: null
+  },
+  statement_descriptor: null,
+  status: "succeeded"
 };
 
 
-xdescribe("GenericAPI", function () {
-  it("should return data from ThirdPartyAPI authorize", function (done) {
-    let cardData = {
+describe("Meteor.Stripe.authorize", function () {
+  it("should call StripeApi.methods.createCharge with the proper parameters and return saved = true", function (done) {
+    let form = {
+      cvv2: "345",
+      expire_month: "4",
+      expire_year: "2019",
       name: "Test User",
       number: "4242424242424242",
-      expireMonth: "2",
-      expireYear: "2018",
-      cvv2: "123",
       type: "visa"
     };
-    let paymentData = {
-      currency: "USD",
-      total: "19.99"
-    };
+    let total = "22.98";
+    let currency = "USD";
 
-    let transactionType = "authorize";
-    let transaction = GenericAPI.methods.authorize.call({
-      transactionType: transactionType,
-      cardData: cardData,
-      paymentData: paymentData
+    spyOn(StripeApi.methods.createCharge, "call").and.returnValue(stripeChargeResult);
+
+    let chargeResult = null;
+    Meteor.Stripe.authorize(form, {total: total, currency: currency}, function (error, result) {
+      chargeResult = result;
     });
 
-    expect(transaction).not.toBe(undefined);
-    done();
-  });
-
-  it("should return data from ThirdPartAPI capture", function (done) {
-    let authorizationId = "abc123";
-    let amount = 19.99;
-    let results = GenericAPI.methods.capture.call({
-      authorizationId: authorizationId,
-      amount: amount
-    });
-    expect(results).not.toBe(undefined);
+    expect(chargeResult).not.toBe(undefined);
+    expect(chargeResult.saved).toBe(true);
     done();
   });
 });
 
-
-xdescribe("Submit payment", function () {
-  it("should call Generic API with card and payment data", function (done) {
-    let cardData = {
+describe("Meteor.Stripe.authorize", function () {
+  it("should properly charge a card when using a currency besides USD", function () {
+    let form = {
+      cvv2: "345",
+      expire_month: "4",
+      expire_year: "2019",
       name: "Test User",
       number: "4242424242424242",
-      expireMonth: "2",
-      expireYear: "2018",
-      cvv2: "123",
       type: "visa"
     };
-    let paymentData = {
-      currency: "USD",
-      total: "19.99"
-    };
+    let total = "22.98";
+    let currency = "EUR";
 
-    let authorizeResult = {
-      saved: true,
-      currency: "USD"
-    };
+    spyOn(StripeApi.methods.createCharge, "call").and.returnValue(stripeChargeResult);
 
-    spyOn(GenericAPI.methods.authorize, "call").and.returnValue(authorizeResult);
-    let results = Meteor.call("genericSubmit", "authorize", cardData, paymentData);
-    expect(GenericAPI.methods.authorize.call).toHaveBeenCalledWith({
-      transactionType: "authorize",
-      cardData: cardData,
-      paymentData: paymentData
+    let chargeResult = null;
+    Meteor.Stripe.authorize(form, {total: total, currency: currency}, function (error, result) {
+      chargeResult = result;
     });
 
-    expect(results.saved).toBe(true);
-    done();
+    expect(chargeResult).not.toBe(undefined);
+    expect(chargeResult.saved).toBe(true);
+    expect(StripeApi.methods.createCharge.call).toHaveBeenCalledWith({
+      chargeObj: {
+        amount: 2298,
+        currency: "EUR",
+        card: {
+          number: "4242424242424242",
+          name: "Test User",
+          cvc: "345",
+          exp_month: "4",
+          exp_year: "2019"
+        }, capture: false
+      }
+    });
   });
+});
 
-  it("should throw an error if card data is not correct", function (done) {
-    let badCardData = {
+describe("Meteor.Stripe.authorize", function () {
+  it("should properly charge a card when using a currency besides USD", function () {
+    let form = {
+      cvv2: "345",
+      expire_month: "4",
+      expire_year: "2019",
       name: "Test User",
-      cvv2: "123",
+      number: "4242424242424242",
       type: "visa"
     };
+    let total = "22.98";
+    let currency = "EUR";
 
-    let paymentData = {
-      currency: "USD",
-      total: "19.99"
-    };
+    spyOn(StripeApi.methods.createCharge, "call").and.returnValue(stripeChargeResult);
 
-    // Notice how you need to wrap this call in another function
-    expect(function () {
-      Meteor.call("genericSubmit", "authorize", badCardData, paymentData);
-    }
-    ).toThrow();
-    done();
-  });
-});
-
-xdescribe("Capture payment", function () {
-  it("should call GenericAPI with transaction ID", function (done) {
-    let captureResults = { success: true };
-    let authorizationId = "abc1234";
-    paymentMethod.transactionId = authorizationId;
-    paymentMethod.amount = 19.99;
-
-    spyOn(GenericAPI.methods.capture, "call").and.returnValue(captureResults);
-    let results = Meteor.call("generic/payment/capture", paymentMethod);
-    expect(GenericAPI.methods.capture.call).toHaveBeenCalledWith({
-      authorizationId: authorizationId,
-      amount: 19.99
-    });
-    expect(results.saved).toBe(true);
-
-    done();
-  });
-
-  it("should throw an error if transaction ID is not found", function (done) {
-    spyOn(GenericAPI.methods, "capture").and.callFake(function () {
-      throw new Meteor.Error("Not Found");
+    let chargeResult = null;
+    Meteor.Stripe.authorize(form, {total: total, currency: currency}, function (error, result) {
+      chargeResult = result;
     });
 
-    expect(function () {
-      Meteor.call("generic/payment/capture", "abc123");
-    }).toThrow();
-    done();
-  });
-});
-
-xdescribe("Refund", function () {
-  it("should call GenericAPI with transaction ID", function (done) {
-    let refundResults = { success: true };
-    let transactionId = "abc1234";
-    let amount = 19.99;
-    paymentMethod.transactionId = transactionId;
-    spyOn(GenericAPI.methods.refund, "call").and.returnValue(refundResults);
-    Meteor.call("generic/refund/create", paymentMethod, amount);
-    expect(GenericAPI.methods.refund.call).toHaveBeenCalledWith({
-      transactionId: transactionId,
-      amount: amount
+    expect(chargeResult).not.toBe(undefined);
+    expect(chargeResult.saved).toBe(true);
+    expect(StripeApi.methods.createCharge.call).toHaveBeenCalledWith({
+      chargeObj: {
+        amount: 2298,
+        currency: "EUR",
+        card: {
+          number: "4242424242424242",
+          name: "Test User",
+          cvc: "345",
+          exp_month: "4",
+          exp_year: "2019"
+        }, capture: false
+      }
     });
-    done();
-  });
-
-  it("should throw an error if transaction ID is not found", function (done) {
-    spyOn(GenericAPI.methods.refund, "call").and.callFake(function () {
-      throw new Meteor.Error("404", "Not Found");
-    });
-
-    let transactionId = "abc1234";
-    paymentMethod.transactionId =  transactionId;
-    expect(function () {
-      Meteor.call("generic/refund/create", paymentMethod, 19.99);
-    }).toThrow(new Meteor.Error("404", "Not Found"));
-    done();
-  });
-});
-
-xdescribe("List Refunds", function () {
-  it("should call GenericAPI with transaction ID", function (done) {
-    let refundResults = { success: true };
-    let refundArgs = {
-      transactionId: "abc1234",
-      amount: 19.99
-    };
-    spyOn(GenericAPI.methods.refund, "call").and.returnValue(refundResults);
-    Meteor.call("generic/refund/list", transactionId);
-    expect(GenericAPI.methods.refund.call).toHaveBeenCalledWith(refundArgs);
-    done();
-  });
-
-  it("should throw an error if transaction ID is not found", function (done) {
-    spyOn(GenericAPI.methods, "refunds").and.callFake(function () {
-      throw new Meteor.Error("404", "Not Found");
-    });
-
-    expect(function () {
-      Meteor.call("generic/refund/list", "abc123", 19.99);
-    }).toThrow(new Meteor.Error("404", "Not Found"));
-    done();
   });
 });
 
