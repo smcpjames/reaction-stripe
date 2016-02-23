@@ -97,3 +97,30 @@ describe("stripe/payment/capture", function () {
   });
 });
 
+describe("stripe/payment/capture", function () {
+  it("should should return a match error if transactionId is not available", function (done) {
+    let paymentMethod = {
+      processor: "Stripe",
+      storedCard: "Visa 4242",
+      method: "credit",
+      amount: 19.99,
+      status: "approved",
+      mode: "capture",
+      createdAt: new Date()
+    };
+
+    spyOn(StripeApi.methods.captureCharge, "call").and.returnValue(stripeCaptureResult);
+
+    let captureResult = null;
+    let captureError = null;
+    Meteor.call("stripe/payment/capture", paymentMethod, function (error, result) {
+      captureResult = result;
+      captureError = error;
+    });
+
+    expect(captureError.message).toBe("Match error: Match error: Transaction id is required");
+    expect(captureResult).toBe(undefined);
+    done();
+  });
+});
+
