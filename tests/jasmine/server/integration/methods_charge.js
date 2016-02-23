@@ -118,7 +118,29 @@ describe("Meteor.Stripe.authorize", function () {
     let total = "22.98";
     let currency = "EUR";
 
-    spyOn(StripeApi.methods.createCharge, "call").and.returnValue(stripeChargeResult);
+    let stripeDeclineResult =
+      {
+        result: null,
+        error: {
+          type: "StripeCardError",
+          rawType: "card_error",
+          code: "card_declined",
+          param: undefined,
+          message: "Your card was declined.",
+          detail: undefined,
+          raw: {
+            message: "Your card was declined.",
+            type: "card_error",
+            code: "card_declined",
+            charge: "ch_17hXeXBXXkbZQs3x3lpNoH9l",
+            statusCode: 402,
+            requestId: "req_7xSZItk9XdVUIJ"
+          },
+          requestId: "req_7xSZItk9XdVUIJ",
+          statusCode: 402
+        }
+      };
+    spyOn(StripeApi.methods.createCharge, "call").and.returnValue(stripeDeclineResult);
 
     let chargeResult = null;
     Meteor.Stripe.authorize(form, {total: total, currency: currency}, function (error, result) {
@@ -126,13 +148,14 @@ describe("Meteor.Stripe.authorize", function () {
     });
 
     expect(chargeResult).not.toBe(undefined);
-    expect(chargeResult.saved).toBe(true);
+    expect(chargeResult.saved).toBe(false);
+    expect(chargeResult.error).toBe("Your card was declined.");
     expect(StripeApi.methods.createCharge.call).toHaveBeenCalledWith({
       chargeObj: {
         amount: 2298,
         currency: "EUR",
         card: {
-          number: "4242424242424242",
+          number: "4000000000000002",
           name: "Test User",
           cvc: "345",
           exp_month: "4",

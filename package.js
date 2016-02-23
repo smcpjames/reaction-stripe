@@ -72,7 +72,10 @@ Package.onTest(function (api) {
 
 
   // server integration tests
-  api.addFiles("tests/jasmine/server/integration/methods.js", "server");
+  api.addFiles("tests/jasmine/server/integration/methods_charge.js", "server");
+  api.addFiles("tests/jasmine/server/integration/methods_capture.js", "server");
+  api.addFiles("tests/jasmine/server/integration/methods_refund.js", "server");
+  api.addFiles("tests/jasmine/server/integration/methods_refundlist.js", "server");
   api.addFiles("tests/jasmine/server/integration/stripeapi.js", "server");
 });
 
