@@ -99,7 +99,7 @@ Meteor.methods({
     let result;
     let captureResult;
     const captureDetails = {
-      amount: Math.round(paymentMethod.amount * 100)
+      amount: formatForStripe(paymentMethod.amount)
     };
 
     try {
@@ -124,6 +124,7 @@ Meteor.methods({
         saved: false,
         error: error
       };
+      return {error: error, result: result};
     }
     return result;
   },
@@ -131,14 +132,17 @@ Meteor.methods({
   "stripe/refund/create": function (paymentMethod, amount) {
     check(paymentMethod, ReactionCore.Schemas.PaymentMethod);
     check(amount, Number);
+    console.log("paymentMethod: " + JSON.stringify(paymentMethod, null, 4));
+    console.log("amount: " + amount);
     let refundDetails = {
       charge: paymentMethod.transactionId,
-      amount: Math.round(amount * 100),
+      amount: formatForStripe(amount),
       reason: "requested_by_customer"
     };
     let result;
     try {
       let refundResult = StripeApi.methods.createRefund.call({refundDetails: refundDetails});
+      console.log("refund results: " + JSON.stringify(refundResult, null, 4));
       if (refundResult.object === "refund") {
         result = {
           saved: true,
@@ -154,8 +158,9 @@ Meteor.methods({
       ReactionCore.Log.warn(error);
       result = {
         saved: false,
-        error: error
+        error: error.message
       };
+      return {error: error, result: result}
     }
 
     return result;
