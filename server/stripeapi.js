@@ -111,7 +111,10 @@ StripeApi.methods.createRefund = new ValidatedMethod({
     } else {
       stripe = Npm.require("stripe")(apiKey);
     }
-    let refundPromise = stripe.refunds.create({ charge: refundDetails.charge }, function (error, result) {
+    let refundPromise = stripe.refunds.create({
+      charge: refundDetails.charge,
+      amount: refundDetails.amount
+    }, function (error, result) {
       return {error: error, result: result};
     });
 
