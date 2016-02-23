@@ -66,22 +66,26 @@ Meteor.methods({
     let result;
     let chargeResult;
 
-    chargeResult = StripeApi.methods.createCharge.call({chargeObj: chargeObj});
-    console.log(chargeResult);
-    if (chargeResult.status === "succeeded") {
-      console.log("success brbanch");
-      result = {
-        saved: true,
-        response: chargeResult
-      };
-    } else {
-      console.log("not success branch");
-      result = {
-        saved: false,
-        error: chargeResult
-      };
+    try {
+      chargeResult = StripeApi.methods.createCharge.call({chargeObj: chargeObj});
+      ReactionCore.Log.info(chargeResult);
+      if (chargeResult.status === "succeeded") {
+        result = {
+          saved: true,
+          response: chargeResult
+        };
+      } else {
+        ReactionCore.Log.info("Stripe Call succeeded but charge failed");
+        result = {
+          saved: false,
+          error: chargeResult.error.message
+        };
+      }
+      return result;
+    } catch (e) {
+      ReactionCore.Log.warn(e);
+      throw new Meteor.Error("error", e.message);
     }
-    return result;
   },
 
   /**

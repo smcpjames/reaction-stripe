@@ -26,12 +26,12 @@ Package.onUse(function (api) {
   api.use("ejson");
   api.use("spacebars");
   api.use("check");
+  api.use("promise");
 
 
   api.use("reactioncommerce:core@0.12.0");
 
   api.use("mdg:validated-method@1.0.1");
-  api.use("jeremy:stripe@1.2.0");
 
   api.imply("mdg:validated-method@1.0.1");
 
@@ -70,7 +70,6 @@ Package.onTest(function (api) {
   api.use("reactioncommerce:core");
   api.use("reactioncommerce:reaction-stripe");
 
-  api.use("jeremy:stripe@1.2.0");
 
   // server integration tests
   api.addFiles("tests/jasmine/server/integration/methods.js", "server");

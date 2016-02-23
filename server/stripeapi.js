@@ -52,17 +52,24 @@ StripeApi.methods.createCharge = new ValidatedMethod({
   run({ chargeObj, apiKey }) {
     let stripe;
     if (!apiKey) {
-      const dyanmicApiKey = StripeApi.methods.getApiKey.call();
-      stripe = StripeSync(dyanmicApiKey);
+      const dynamicApiKey = StripeApi.methods.getApiKey.call();
+      stripe = Npm.require("stripe")(dynamicApiKey);
     } else {
-      stripe = StripeSync(apiKey);
+      stripe = Npm.require("stripe")(apiKey);
     }
     try {
-      let chargeResult = stripe.charges.create(chargeObj);
-      return chargeResult;
+      let chargePromise = stripe.charges.create(chargeObj, function (error, result) {
+        return {error: error, result: result};
+      });
+      let promiseResult = Promise.await(chargePromise);
+      return promiseResult;
     } catch (e) {
-      console.log("stripe charge error: " + e);
-      throw new Meteor.Error("error", "charging error")
+      // Handle "expected" errors differently
+      if (e.code === "card_declined") {
+        return {error: e, result: null};
+      }
+      ReactionCore.Log.warn(e);
+      throw Meteor.Error("Stripe Charge FAIL", e);
     }
   }
 });
@@ -78,11 +85,14 @@ StripeApi.methods.captureCharge = new ValidatedMethod({
     let stripe;
     if (!apiKey) {
       const dynamicApiKey = StripeApi.methods.getApiKey.call();
-      stripe = StripeSync(dynamicApiKey);
+      stripe = Npm.require("stripe")(dynamicApiKey);
     } else {
-      stripe = StripeSync(apiKey);
+      stripe = Npm.require("stripe")(apiKey);
     }
-    let captureResults = stripe.charges.capture(transactionId, captureDetails);
+    let capturePromise = stripe.charges.capture(transactionId, captureDetails, function (error, result) {
+      return {error: error, result: result};
+    });
+    let captureResults = Promise.await(capturePromise);
     return captureResults;
   }
 });
@@ -97,11 +107,15 @@ StripeApi.methods.createRefund = new ValidatedMethod({
     let stripe;
     if (!apiKey) {
       const dynamicApiKey = StripeApi.methods.getApiKey.call();
-      stripe = StripeSync(dynamicApiKey);
+      stripe = Npm.require("stripe")(dynamicApiKey);
     } else {
-      stripe = StripeSync(apiKey);
+      stripe = Npm.require("stripe")(apiKey);
     }
-    let refundResults = stripe.refunds.create({ charge: refundDetails.charge });
+    let refundPromise = stripe.refunds.create({ charge: refundDetails.charge }, function (error, result) {
+      return {error: error, result: result};
+    });
+
+    let refundResults = Promise.await(refundPromise);
     return refundResults;
   }
 });
@@ -116,11 +130,14 @@ StripeApi.methods.listRefunds = new ValidatedMethod({
     let stripe;
     if (!apiKey) {
       const dynamicApiKey = StripeApi.methods.getApiKey.call();
-      stripe = StripeSync(dynamicApiKey);
+      stripe = Npm.require("stripe")(dynamicApiKey);
     } else {
-      stripe = StripeSync(apiKey);
+      stripe = Npm.require("stripe")(apiKey);
     }
-    let refundListResults = stripe.refunds.list({ charge: transactionId });
+    let refundListPromise = stripe.refunds.list({ charge: transactionId }, function (error, result) {
+      return {error: error, result: result};
+    });
+    let refundListResults = Promise.await(refundListPromise);
     return refundListResults;
   }
 });
