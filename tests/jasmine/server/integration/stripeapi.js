@@ -61,7 +61,7 @@ xdescribe("StripeAPI captureCharge function", function () {
 
 xdescribe("StripeAPI createRefund function", function () {
   it("should return a result with object = refund", function (done) {
-    let apiKey = "sk_test_jxjbS3bM2S8m52EiqI4wvsuZ";
+    let apiKey = "";
     let cardObject = {
       number: "4242424242424242",
       name: "Test User",
