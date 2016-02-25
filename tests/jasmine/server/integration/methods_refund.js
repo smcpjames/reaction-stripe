@@ -11,7 +11,7 @@ describe("stripe/refund/create", function () {
       amount: 19.99,
       status: "completed",
       mode: "capture",
-      createdAt: "2016-02-23T05:51:22.591Z",
+      createdAt: new Date(),
       workflow: {status: "new"},
       metadata: {}
     };
@@ -29,11 +29,11 @@ describe("stripe/refund/create", function () {
       receipt_number: null
     };
 
-    spyOn(StripeApi.methods.captureCharge, "call").and.returnValue(stripeRefundResult);
+    spyOn(StripeApi.methods.createRefund, "call").and.returnValue(stripeRefundResult);
 
     let refundResult = null;
     let refundError = null;
-    Meteor.call("stripe/refund/create", paymentMethod, function (error, result) {
+    Meteor.call("stripe/refund/create", paymentMethod, paymentMethod.amount, function (error, result) {
       refundResult = result;
       refundError = error;
     });
@@ -42,9 +42,10 @@ describe("stripe/refund/create", function () {
     expect(refundResult).not.toBe(undefined);
     expect(refundResult.saved).toBe(true);
     expect(StripeApi.methods.createRefund.call).toHaveBeenCalledWith({
-      transactionId: paymentMethod.transactionId,
-      captureDetails: {
-        amount: 1999
+      refundDetails: {
+        charge: paymentMethod.transactionId,
+        amount: 1999,
+        reason: "requested_by_customer"
       }
     });
     done();

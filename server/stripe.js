@@ -129,20 +129,26 @@ Meteor.methods({
     return result;
   },
 
-  "stripe/refund/create": function (paymentMethod, amount) {
+  /**
+   * Issue a refund against a previously captured transaction
+   * @see https://stripe.com/docs/api#refunds
+   * @param  {Object} paymentMethod object
+   * @param  {Number} amount to be refunded
+   * @param  {String} reason refund was issued (currently unused by client)
+   * @return {Object} result
+   */
+  "stripe/refund/create": function (paymentMethod, amount, reason = "requested_by_customer") {
     check(paymentMethod, ReactionCore.Schemas.PaymentMethod);
     check(amount, Number);
-    console.log("paymentMethod: " + JSON.stringify(paymentMethod, null, 4));
-    console.log("amount: " + amount);
+    check(reason, String);
     let refundDetails = {
       charge: paymentMethod.transactionId,
       amount: formatForStripe(amount),
-      reason: "requested_by_customer"
+      reason: reason
     };
     let result;
     try {
       let refundResult = StripeApi.methods.createRefund.call({refundDetails: refundDetails});
-      console.log("refund results: " + JSON.stringify(refundResult, null, 4));
       if (refundResult.object === "refund") {
         result = {
           saved: true,
@@ -153,6 +159,7 @@ Meteor.methods({
           saved: false,
           response: refundResult
         };
+        ReactionCore.Log.warn("Stripe call succeeded but refund not issued");
       }
     } catch (error) {
       ReactionCore.Log.warn(error);
@@ -160,7 +167,7 @@ Meteor.methods({
         saved: false,
         error: error.message
       };
-      return {error: error, result: result}
+      return {error: error, result: result};
     }
 
     return result;

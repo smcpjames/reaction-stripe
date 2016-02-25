@@ -30,6 +30,13 @@ refundDetailsSchema = new SimpleSchema({
   reason: { type: String }
 });
 
+// These are errors on the user side that we just want to pass back up to the user
+let expectedErrors = [
+  "card_declined",
+  "incorrect_cvc",
+  "expired_card"
+];
+
 StripeApi.methods.getApiKey = new ValidatedMethod({
   name: "StripeApi.methods.getApiKey",
   validate: null,
@@ -65,9 +72,11 @@ StripeApi.methods.createCharge = new ValidatedMethod({
       return promiseResult;
     } catch (e) {
       // Handle "expected" errors differently
-      if (e.code === "card_declined") {
+      if (e.rawType === "card_error" && _.contains(expectedErrors, e.code)) {
+        ReactionCore.Log.info("Error from Stripe is expected, not throwing");
         return {error: e, result: null};
       }
+      ReactionCore.Log.warn("Received unexpected error code: " + e.code);
       ReactionCore.Log.warn(e);
       throw Meteor.Error("Stripe Charge FAIL", e);
     }

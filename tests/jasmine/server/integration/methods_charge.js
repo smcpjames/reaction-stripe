@@ -166,3 +166,67 @@ describe("Meteor.Stripe.authorize", function () {
   });
 });
 
+describe("Meteor.Stripe.authorize", function () {
+  it("should return saved = false when an expired card is returned", function () {
+    // Note that this test number makes the Stripe API return this error, it is
+    // not looking at the actual expiration date.
+    let form = {
+      cvv2: "345",
+      expire_month: "4",
+      expire_year: "2019",
+      name: "Test User",
+      number: "4000000000000069",
+      type: "visa"
+    };
+    let total = "22.98";
+    let currency = "USD";
+
+    let stripeExpiredCardResult =
+      {
+        result: null,
+        error: {
+          type: "StripeCardError",
+          rawType: "card_error",
+          code: "expired_card",
+          param: "exp_month",
+          message: "Your card has expired.",
+          raw: {
+            message: "Your card has expired.",
+            type: "card_error",
+            param: "exp_month",
+            code: "expired_card",
+            charge: "ch_17iBsDBXXkbZQs3xfZArVPEd",
+            statusCode: 402,
+            requestId: "req_7y88CojR2UJYOd"
+          },
+          requestId: "req_7y88CojR2UJYOd",
+          statusCode: 402
+        }
+      };
+    spyOn(StripeApi.methods.createCharge, "call").and.returnValue(stripeExpiredCardResult);
+
+    let chargeResult = null;
+    Meteor.Stripe.authorize(form, {total: total, currency: currency}, function (error, result) {
+      chargeResult = result;
+    });
+
+    expect(chargeResult).not.toBe(undefined);
+    expect(chargeResult.saved).toBe(false);
+    expect(chargeResult.error).toBe("Your card has expired.");
+    expect(StripeApi.methods.createCharge.call).toHaveBeenCalledWith({
+      chargeObj: {
+        amount: 2298,
+        currency: "USD",
+        card: {
+          number: "4000000000000069",
+          name: "Test User",
+          cvc: "345",
+          exp_month: "4",
+          exp_year: "2019"
+        }, capture: false
+      }
+    });
+  });
+});
+
+
