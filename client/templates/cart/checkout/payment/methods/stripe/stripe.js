@@ -1,23 +1,22 @@
-var handleStripeSubmitError, hidePaymentAlert, paymentAlert, submitting, uiEnd;
+/* eslint camelcase: 0 */
 
-uiEnd = function(template, buttonText) {
+uiEnd = function (template, buttonText) {
   template.$(":input").removeAttr("disabled");
   template.$("#btn-complete-order").text(buttonText);
   return template.$("#btn-processing").addClass("hidden");
 };
 
-paymentAlert = function(errorMessage) {
+paymentAlert = function (errorMessage) {
   return $(".alert").removeClass("hidden").text(errorMessage);
 };
 
-hidePaymentAlert = function() {
-  return $(".alert").addClass("hidden").text('');
+hidePaymentAlert = function () {
+  return $(".alert").addClass("hidden").text("");
 };
 
-handleStripeSubmitError = function(error) {
-  var serverError, singleError;
-  singleError = error;
-  serverError = error != null ? error.message : void 0;
+handleStripeSubmitError = function (error) {
+  let singleError = error;
+  let serverError = error !== null ? error.message : void 0;
   if (serverError) {
     return paymentAlert("Oops! " + serverError);
   } else if (singleError) {
@@ -25,15 +24,12 @@ handleStripeSubmitError = function(error) {
   }
 };
 
-submitting = false;
 
 AutoForm.addHooks("stripe-payment-form", {
-  onSubmit: function(doc) {
-    var form, storedCard, template;
-    submitting = true;
-    template = this.template;
+  onSubmit: function (doc) {
+    let template = this.template;
     hidePaymentAlert();
-    form = {
+    let form = {
       name: doc.payerName,
       number: doc.cardNumber,
       expire_month: doc.expireMonth,
@@ -41,38 +37,37 @@ AutoForm.addHooks("stripe-payment-form", {
       cvv2: doc.cvv,
       type: getCardType(doc.cardNumber)
     };
-    storedCard = form.type.charAt(0).toUpperCase() + form.type.slice(1) + " " + doc.cardNumber.slice(-4);
+    let storedCard = form.type.charAt(0).toUpperCase() + form.type.slice(1) + " " + doc.cardNumber.slice(-4);
     Meteor.Stripe.authorize(form, {
       total: ReactionCore.Collections.Cart.findOne().cartTotal(),
       currency: ReactionCore.Collections.Shops.findOne().currency
-    }, function(error, transaction) {
-      var normalizedMode, normalizedStatus, paymentMethod;
+    }, function (error, transaction) {
       submitting = false;
       if (error) {
         handleStripeSubmitError(error);
         uiEnd(template, "Resubmit payment");
       } else {
         if (transaction.saved === true) {
-          normalizedStatus = (function() {
+          let normalizedStatus = (function () {
             switch (false) {
-              case !(!transaction.response.captured && !transaction.response.failure_code):
-                return "created";
-              case !(transaction.response.captured === true && !transaction.response.failure_code):
-                return "settled";
-              case !transaction.response.failure_code:
-                return "failed";
-              default:
-                return "failed";
+            case !(!transaction.response.captured && !transaction.response.failure_code):
+              return "created";
+            case !(transaction.response.captured === true && !transaction.response.failure_code):
+              return "settled";
+            case !transaction.response.failure_code:
+              return "failed";
+            default:
+              return "failed";
             }
           })();
-          normalizedMode = (function() {
+          let normalizedMode = (function () {
             switch (false) {
-              case !(!transaction.response.captured && !transaction.response.failure_code):
-                return "authorize";
-              case !transaction.response.captured:
-                return "capture";
-              default:
-                return "capture";
+            case !(!transaction.response.captured && !transaction.response.failure_code):
+              return "authorize";
+            case !transaction.response.captured:
+              return "capture";
+            default:
+              return "capture";
             }
           })();
           paymentMethod = {
@@ -96,12 +91,12 @@ AutoForm.addHooks("stripe-payment-form", {
     });
     return false;
   },
-  beginSubmit: function() {
+  beginSubmit: function () {
     this.template.$(":input").attr("disabled", true);
     this.template.$("#btn-complete-order").text("Submitting ");
     return this.template.$("#btn-processing").removeClass("hidden");
   },
-  endSubmit: function() {
+  endSubmit: function () {
     if (!submitting) {
       return uiEnd(this.template, "Complete your order");
     }

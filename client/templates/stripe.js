@@ -1,5 +1,5 @@
 Template.stripeSettings.helpers({
-  packageData: function() {
+  packageData: function () {
     return ReactionCore.Collections.Packages.findOne({
       name: "reaction-stripe"
     });
@@ -7,7 +7,7 @@ Template.stripeSettings.helpers({
 });
 
 Template.stripe.helpers({
-  packageData: function() {
+  packageData: function () {
     return ReactionCore.Collections.Packages.findOne({
       name: "reaction-stripe"
     });
@@ -22,13 +22,15 @@ Template.stripe.events({
 
 AutoForm.hooks({
   "stripe-update-form": {
-    onSuccess: function(operation, result, template) {
+    /* eslint-disable no-unused-vars*/
+    onSuccess: function (operation, result, template) {
       Alerts.removeSeen();
       return Alerts.add("Stripe settings saved.", "success");
     },
-    onError: function(operation, error, template) {
+    onError: function (operation, error, template) {
       Alerts.removeSeen();
       return Alerts.add("Stripe settings update failed. " + error, "danger");
     }
+    /* eslint-enable no-unused-vars*/
   }
 });

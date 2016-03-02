@@ -1,3 +1,5 @@
+/* eslint camelcase: 0 */
+
 ReactionCore.registerPackage({
   label: "Stripe",
   name: "reaction-stripe",
@@ -24,7 +26,7 @@ ReactionCore.registerPackage({
       route: "/dashboard/stripe",
       provides: "settings",
       container: "dashboard",
-      template: "stripeSettings",
+      template: "stripeSettings"
     },
 
     // Payment form for checkout

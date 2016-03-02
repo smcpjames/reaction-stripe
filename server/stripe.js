@@ -1,12 +1,41 @@
- var Fiber, Future, ValidCVV, ValidCardNumber, ValidExpireMonth, ValidExpireYear;
+/* eslint camelcase: 0 */
 
-Fiber = Npm.require("fibers");
 
-Future = Npm.require("fibers/future");
+const ValidCardNumber = Match.Where(function (x) {
+  return /^[0-9]{14,16}$/.test(x);
+});
+
+const ValidExpireMonth = Match.Where(function (x) {
+  return /^[0-9]{1,2}$/.test(x);
+});
+
+const ValidExpireYear = Match.Where(function (x) {
+  return /^[0-9]{4}$/.test(x);
+});
+
+const ValidCVV = Match.Where(function (x) {
+  return /^[0-9]{3,4}$/.test(x);
+});
+
+parseCardData = function (data) {
+  let parsedCardData = {
+    number: data.number,
+    name: data.name,
+    cvc: data.cvv2,
+    exp_month: data.expire_month,
+    exp_year: data.expire_year
+  };
+  return parsedCardData;
+};
+
+// Stripe uses a "Decimal-less" format so 10.00 becomes 1000
+formatForStripe = function (amount) {
+  return Math.round(amount * 100);
+};
+
 
 Meteor.methods({
-  stripeSubmit: function (transactionType, cardData, paymentData) {
-    var Stripe, chargeObj, fut;
+  "stripeSubmit": function (transactionType, cardData, paymentData) {
     check(transactionType, String);
     check(cardData, {
       name: String,
@@ -20,33 +49,42 @@ Meteor.methods({
       total: String,
       currency: String
     });
-    Stripe = Npm.require("stripe")(Meteor.Stripe.accountOptions());
-    chargeObj = Meteor.Stripe.chargeObj();
+
+    let chargeObj = {
+      amount: "",
+      currency: "",
+      card: {},
+      capture: true
+    };
+
     if (transactionType === "authorize") {
       chargeObj.capture = false;
     }
-    chargeObj.card = Meteor.Stripe.parseCardData(cardData);
-    chargeObj.amount = Math.round(paymentData.total * 100);
+    chargeObj.card = parseCardData(cardData);
+    chargeObj.amount = formatForStripe(paymentData.total);
     chargeObj.currency = paymentData.currency;
-    fut = new Future();
-    this.unblock();
-    Stripe.charges.create(chargeObj, Meteor.bindEnvironment(function (
-      error, result) {
-      if (error) {
-        fut["return"]({
-          saved: false,
-          error: error
-        });
-      } else {
-        fut["return"]({
+    let result;
+    let chargeResult;
+
+    try {
+      chargeResult = StripeApi.methods.createCharge.call({chargeObj: chargeObj});
+      if (chargeResult.status === "succeeded") {
+        result = {
           saved: true,
-          response: result
-        });
+          response: chargeResult
+        };
+      } else {
+        ReactionCore.Log.info("Stripe Call succeeded but charge failed");
+        result = {
+          saved: false,
+          error: chargeResult.error.message
+        };
       }
-    }, function (e) {
+      return result;
+    } catch (e) {
       ReactionCore.Log.warn(e);
-    }));
-    return fut.wait();
+      throw new Meteor.Error("error", e.message);
+    }
   },
 
   /**
@@ -57,67 +95,81 @@ Meteor.methods({
    */
   "stripe/payment/capture": function (paymentMethod) {
     check(paymentMethod, ReactionCore.Schemas.PaymentMethod);
-    this.unblock();
-
     let result;
-    const stripe = Npm.require("stripe")(Meteor.Stripe.accountOptions());
-    const capturePayment = Meteor.wrapAsync(stripe.charges.capture, stripe.charges);
+    let captureResult;
     const captureDetails = {
-      amount: Math.round(paymentMethod.amount * 100)
+      amount: formatForStripe(paymentMethod.amount)
     };
 
     try {
-      const response = capturePayment(paymentMethod.transactionId, captureDetails);
-      result = {
-        saved: true,
-        response: response
-      };
-    } catch (e) {
-      ReactionCore.Log.warn(e);
+      captureResult = StripeApi.methods.captureCharge.call({
+        transactionId: paymentMethod.transactionId,
+        captureDetails: captureDetails
+      });
+      if (captureResult.status === "succeeded") {
+        result = {
+          saved: true,
+          response: captureResult
+        };
+      } else {
+        result = {
+          saved: false,
+          response: captureResult
+        };
+      }
+    } catch (error) {
+      ReactionCore.Log.warn(error);
       result = {
         saved: false,
-        error: e
+        error: error
       };
+      return {error: error, result: result};
     }
-
     return result;
   },
 
-  "stripe/refund/create": function(paymentMethod, amount) {
+  /**
+   * Issue a refund against a previously captured transaction
+   * @see https://stripe.com/docs/api#refunds
+   * @param  {Object} paymentMethod object
+   * @param  {Number} amount to be refunded
+   * @param  {String} reason refund was issued (currently unused by client)
+   * @return {Object} result
+   */
+  "stripe/refund/create": function (paymentMethod, amount, reason = "requested_by_customer") {
     check(paymentMethod, ReactionCore.Schemas.PaymentMethod);
     check(amount, Number);
-
-
+    check(reason, String);
     let refundDetails = {
       charge: paymentMethod.transactionId,
-      amount: Math.round(amount * 100),
-      reason: "requested_by_customer"
+      amount: formatForStripe(amount),
+      reason: reason
     };
+    let result;
+    try {
+      let refundResult = StripeApi.methods.createRefund.call({refundDetails: refundDetails});
+      if (refundResult.object === "refund") {
+        result = {
+          saved: true,
+          response: refundResult
+        };
+      } else {
+        result = {
+          saved: false,
+          response: refundResult
+        };
+        ReactionCore.Log.warn("Stripe call succeeded but refund not issued");
+      }
+    } catch (error) {
+      ReactionCore.Log.warn(error);
+      result = {
+        saved: false,
+        error: error.message
+      };
+      return {error: error, result: result};
+    }
 
-    var Stripe, fut;
-    Stripe = Npm.require("stripe")(Meteor.Stripe.accountOptions());
-    fut = new Future();
-    this.unblock();
-    Stripe.refunds.create(refundDetails, Meteor.bindEnvironment(
-      function (error, result) {
-        if (error) {
-          fut["return"]({
-            saved: false,
-            error: error
-          });
-        } else {
-          fut["return"]({
-            saved: true,
-            type: result.object,
-            amount: result.amount / 100,
-            rawTransaction: result
-          });
-        }
-      },
-      function (e) {
-        ReactionCore.Log.warn(e);
-      }));
-    return fut.wait();
+    return result;
   },
 
   /**
@@ -127,14 +179,9 @@ Meteor.methods({
    */
   "stripe/refund/list": function (paymentMethod) {
     check(paymentMethod, ReactionCore.Schemas.PaymentMethod);
-    this.unblock();
-
-    let stripe = Npm.require("stripe")(Meteor.Stripe.accountOptions());
-    let listRefunds = Meteor.wrapAsync(stripe.refunds.list, stripe.refunds);
     let result;
-
     try {
-      let refunds = listRefunds({charge: paymentMethod.transactionId});
+      let refunds = StripeApi.methods.listRefunds.call({transactionId: paymentMethod.transactionId});
       result = [];
       for (let refund of refunds.data) {
         result.push({
@@ -145,28 +192,12 @@ Meteor.methods({
           raw: refund
         });
       }
-    } catch (e) {
+    } catch (error) {
+      ReactionCore.Log.warn(error);
       result = {
-        error: e
+        error: error
       };
     }
-
     return result;
   }
-});
-
-ValidCardNumber = Match.Where(function (x) {
-  return /^[0-9]{14,16}$/.test(x);
-});
-
-ValidExpireMonth = Match.Where(function (x) {
-  return /^[0-9]{1,2}$/.test(x);
-});
-
-ValidExpireYear = Match.Where(function (x) {
-  return /^[0-9]{4}$/.test(x);
-});
-
-ValidCVV = Match.Where(function (x) {
-  return /^[0-9]{3,4}$/.test(x);
 });
