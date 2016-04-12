@@ -10,7 +10,7 @@ Npm.depends({
 });
 
 Package.onUse(function (api) {
-  api.versionsFrom("METEOR@1.2");
+  api.versionsFrom("METEOR@1.3");
 
   // meteor base packages
   api.use("meteor-base");
@@ -18,7 +18,6 @@ Package.onUse(function (api) {
   api.use("ecmascript");
   api.use("blaze-html-templates");
   api.use("session");
-  api.use("jquery");
   api.use("tracker");
   api.use("logging");
   api.use("reload");
@@ -29,7 +28,7 @@ Package.onUse(function (api) {
   api.use("promise");
 
 
-  api.use("reactioncommerce:core@0.12.0");
+  api.use("reactioncommerce:core@0.13.0");
 
   api.use("mdg:validated-method@1.0.1");
 
@@ -78,4 +77,3 @@ Package.onTest(function (api) {
   api.addFiles("tests/jasmine/server/integration/methods_refundlist.js", "server");
   api.addFiles("tests/jasmine/server/integration/stripeapi.js", "server");
 });
-

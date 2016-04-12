@@ -2,15 +2,23 @@
   "dependencies": {
     "stripe": {
       "version": "4.4.0",
+      "resolved": "https://registry.npmjs.org/stripe/-/stripe-4.4.0.tgz",
+      "from": "https://registry.npmjs.org/stripe/-/stripe-4.4.0.tgz",
       "dependencies": {
         "bluebird": {
-          "version": "2.10.2"
-        },
-        "qs": {
-          "version": "2.4.2"
+          "version": "2.10.2",
+          "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-2.10.2.tgz",
+          "from": "https://registry.npmjs.org/bluebird/-/bluebird-2.10.2.tgz"
         },
         "lodash": {
-          "version": "3.10.1"
+          "version": "3.10.1",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.10.1.tgz",
+          "from": "https://registry.npmjs.org/lodash/-/lodash-3.10.1.tgz"
+        },
+        "qs": {
+          "version": "2.4.2",
+          "resolved": "https://registry.npmjs.org/qs/-/qs-2.4.2.tgz",
+          "from": "https://registry.npmjs.org/qs/-/qs-2.4.2.tgz"
         }
       }
     }
