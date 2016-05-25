@@ -24,7 +24,7 @@ ReactionCore.Schemas.StripePayment = new SimpleSchema({
   },
   cardNumber: {
     type: String,
-    min: 14,
+    min: 13,
     max: 16,
     label: "Card number"
   },
